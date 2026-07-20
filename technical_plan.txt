@@ -1,0 +1,226 @@
+# Prompt: Create a Technical Architecture Plan
+
+You are a **Senior AI Solutions Architect** responsible for designing enterprise-grade AI systems.
+
+I will provide you with a Product Requirements Document (PRD) describing an AI-powered Product Discovery Engine for Blinkit.
+
+Your task is to create a comprehensive **Technical Architecture Plan**.
+
+Do **not** generate application code or an implementation plan. Focus solely on the system architecture.
+
+---
+
+## Deliverables
+
+### 1. Executive Summary
+
+Provide a brief overview of the proposed architecture and explain how it addresses the business objective.
+
+---
+
+### 2. Architectural Principles
+
+Define the key principles guiding the architecture, such as:
+
+* Scalability
+* Modularity
+* Extensibility
+* Reliability
+* Maintainability
+* Explainability
+* Cost efficiency
+* AI-first design
+
+---
+
+### 3. High-Level System Architecture
+
+Design the major components of the system.
+
+Include:
+
+* Data Sources
+* Data Ingestion Layer
+* Data Processing Layer
+* AI Analysis Layer
+* Storage Layer
+* Retrieval Layer
+* Analytics & Dashboard Layer
+* Configuration Layer
+* Monitoring & Logging Layer
+
+Explain the purpose and responsibilities of each component.
+
+---
+
+### 4. Architecture Diagram
+
+Create a high-level architecture diagram using Mermaid syntax that illustrates how all system components interact.
+
+---
+
+### 5. End-to-End Data Flow
+
+Describe the complete lifecycle of data:
+
+* Collection
+* Cleaning
+* Processing
+* Storage
+* AI Analysis
+* Insight Generation
+* Visualization
+
+Clearly explain how data moves through each layer.
+
+---
+
+### 6. AI Architecture
+
+Design the AI pipeline.
+
+Explain how the architecture should support:
+
+* Text preprocessing
+* Embedding generation
+* Semantic search
+* Topic clustering
+* Theme extraction
+* Sentiment analysis
+* User segmentation
+* Pain-point identification
+* Opportunity detection
+* Retrieval-Augmented Generation (RAG)
+* Insight generation
+* Confidence scoring
+* Evidence grounding
+
+For each AI component explain:
+
+* Purpose
+* Inputs
+* Outputs
+* Dependencies
+
+---
+
+### 7. Data Ingestion Architecture
+
+Design an extensible ingestion framework capable of supporting multiple public data sources.
+
+Explain:
+
+* Connector architecture
+* Scheduling strategy
+* Incremental ingestion
+* Rate limiting
+* Retry mechanisms
+* Data validation
+* Duplicate detection
+* Error handling
+
+The architecture should allow new sources to be added without modifying the core system.
+
+---
+
+### 8. Storage Architecture
+
+Recommend how different types of data should be stored.
+
+Include:
+
+* Raw reviews
+* Cleaned reviews
+* Metadata
+* AI-generated insights
+* User quotes
+* Embeddings
+* Configuration
+* Audit logs
+
+Describe how these storage components relate to each other.
+
+---
+
+### 9. Dashboard Architecture
+
+Design the architecture of the analytics dashboard.
+
+Describe how the dashboard will present:
+
+* Review statistics
+* Theme analysis
+* Sentiment trends
+* User segments
+* Emerging topics
+* Opportunity areas
+* Supporting evidence
+* AI-generated summaries
+
+---
+
+### 10. Deployment Architecture
+
+Design a production-ready deployment architecture.
+
+Include:
+
+* Application services
+* APIs
+* Background workers
+* Databases
+* Object storage
+* Monitoring
+* Logging
+* Secrets management
+* Environment configuration
+
+Explain how the architecture can scale as data volume grows.
+
+---
+
+### 11. Cross-Cutting Concerns
+
+Discuss architectural considerations for:
+
+* Authentication (if required)
+* Authorization
+* Security
+* Data privacy
+* API rate limits
+* Fault tolerance
+* Backup strategy
+* Disaster recovery
+* Observability
+* Performance
+* Cost optimization
+
+---
+
+### 12. Architecture Decisions
+
+For every major architectural decision, explain:
+
+* Why it was chosen
+* Alternatives considered
+* Trade-offs
+* Future scalability implications
+
+---
+
+## Output Requirements
+
+Present the response as a professional architecture document that could be reviewed by Engineering Managers, Product Managers, and Solution Architects before implementation begins.
+
+The architecture should be:
+
+* Production-ready
+* Modular
+* Scalable
+* Extensible
+* AI-native
+* Well-documented
+
+Do **not** generate code or an implementation roadmap. Focus exclusively on designing the technical architecture.
+
+After reading this prompt, I will provide the Product Requirements Document (PRD) for analysis.
