@@ -99,7 +99,7 @@ def get_stats():
 def get_reviews(limit: int = 50):
     db = SessionLocal()
     try:
-        reviews = db.query(ProcessedData).order_by(ProcessedData.created_at.desc()).limit(limit).all()
+        reviews = db.query(ProcessedData).join(RawData, ProcessedData.raw_data_id == RawData.id).order_by(RawData.created_at.desc()).limit(limit).all()
         formatted_reviews = []
         for r in reviews:
             topics = r.topic_tags
