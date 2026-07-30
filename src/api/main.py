@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import json
 from pydantic import BaseModel
 from sqlalchemy import func
 from src.db.database import SessionLocal
@@ -12,7 +13,7 @@ app = FastAPI(title="Blinkit AI Discovery Engine API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # For MVP
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -23,9 +24,56 @@ class QueryRequest(BaseModel):
 @app.get("/api/stats")
 def get_stats():
     db = SessionLocal()
+    import json
     try:
         total_raw = db.query(RawData).count()
         total_processed = db.query(ProcessedData).count()
+        
+        sources_count = db.query(RawData.source).distinct().count()
+        
+        raw_data = db.query(RawData.metadata_json).all()
+        positive = 0
+        negative = 0
+        neutral = 0
+        for row in raw_data:
+            metadata = row[0]
+            if isinstance(metadata, str):
+                try:
+                    metadata = json.loads(metadata)
+                except:
+                    metadata = {}
+            if isinstance(metadata, dict):
+                score = metadata.get("score")
+                if score is not None:
+                    try:
+                        score = int(score)
+                        if score >= 4:
+                            positive += 1
+                        elif score == 3:
+                            neutral += 1
+                        else:
+                            negative += 1
+                    except:
+                        pass
+        
+        segments_count = db.query(ProcessedData.user_segment).filter(
+            ProcessedData.user_segment.isnot(None), 
+            ProcessedData.user_segment != 'Unknown'
+        ).distinct().count()
+        
+        processed_topics = db.query(ProcessedData.topic_tags).all()
+        unique_topics = set()
+        for row in processed_topics:
+            topics = row[0]
+            if isinstance(topics, str):
+                try:
+                    topics = json.loads(topics)
+                except:
+                    topics = []
+            if isinstance(topics, list):
+                for t in topics:
+                    unique_topics.add(t)
+        topics_count = len(unique_topics)
         
         # Get top segments
         segments = db.query(
@@ -36,6 +84,12 @@ def get_stats():
         return {
             "total_reviews": total_raw,
             "processed_reviews": total_processed,
+            "positive": positive,
+            "negative": negative,
+            "neutral": neutral,
+            "sources_analysed": sources_count,
+            "user_segments": segments_count,
+            "topics_identified": topics_count,
             "segments": [{"name": s[0], "value": s[1]} for s in segments if s[0]]
         }
     finally:
@@ -46,14 +100,21 @@ def get_reviews(limit: int = 50):
     db = SessionLocal()
     try:
         reviews = db.query(ProcessedData).order_by(ProcessedData.created_at.desc()).limit(limit).all()
-        return [
-            {
+        formatted_reviews = []
+        for r in reviews:
+            topics = r.topic_tags
+            if isinstance(topics, str):
+                try:
+                    topics = json.loads(topics)
+                except:
+                    topics = []
+            formatted_reviews.append({
                 "id": r.id,
                 "content": r.normalized_content,
                 "segment": r.user_segment,
-                "topics": r.topic_tags
-            } for r in reviews
-        ]
+                "topics": topics
+            })
+        return formatted_reviews
     finally:
         db.close()
 
@@ -67,7 +128,13 @@ def get_heatmap():
             segment = r.user_segment or "Unknown"
             if segment not in heatmap:
                 heatmap[segment] = {}
-            for topic in (r.topic_tags or []):
+            topics = r.topic_tags
+            if isinstance(topics, str):
+                try:
+                    topics = json.loads(topics)
+                except:
+                    topics = []
+            for topic in (topics or []):
                 if topic not in heatmap[segment]:
                     heatmap[segment][topic] = 0
                 heatmap[segment][topic] += 1
