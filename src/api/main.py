@@ -18,6 +18,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def start_orchestrator():
+    import schedule
+    import time
+    from src.orchestrator import run_ingestion
+    
+    print("FastAPI background worker started. Running initial ingestion...")
+    run_ingestion()
+    print("Initial ingestion complete. Entering schedule loop...")
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
+
+@app.on_event("startup")
+def startup_event():
+    import threading
+    worker_thread = threading.Thread(target=start_orchestrator, daemon=True)
+    worker_thread.start()
+    print("Started background orchestrator thread.")
+
 class QueryRequest(BaseModel):
     query: str
 

@@ -83,10 +83,10 @@ def run_normalizer(limit=50):
                 
                 if success_count % 10 == 0:
                     db.commit() # batch commit
-                time.sleep(2) # 2-second delay for rate limit
             except Exception as item_error:
                 print(f"Error processing record {record.id}: {item_error}")
-                # Optional: Handle rate limits (time.sleep) if hitting Groq limits
+            finally:
+                time.sleep(2) # 2-second delay for rate limit ALWAYS respected
                 
         db.commit()
         print(f"Successfully normalized {success_count} records.")

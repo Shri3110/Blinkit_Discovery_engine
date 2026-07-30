@@ -13,13 +13,13 @@ def infer_segmentation(content):
         
     system_prompt = """
     Analyze the user review/feedback.
-    Infer the demographic user segment (e.g., 'Bachelor', 'Family', 'Student', 'Pet Owner', or 'General' if unknown).
-    Infer 1-3 primary topics (e.g., 'Quality', 'Pricing', 'Delivery', 'Electronics', 'Fresh Produce').
+    Infer the behavioral user persona based on their pain points or needs (e.g., 'Price-Conscious Shopper', 'Convenience Seeker', 'Quality-Driven Buyer', 'Frustrated Power User', 'Brand Loyalist'). Avoid generic demographic guesses unless explicitly stated.
+    Infer 1-3 primary product/service topics, and attach an implicit sentiment if applicable (e.g., '[Sentiment: Positive] Quick Delivery', '[Sentiment: Negative] Spoiled Produce', 'App Navigation').
     
     You MUST output valid JSON only in this exact format:
     {
-      "segment": "Family",
-      "topics": ["Quality", "Delivery"]
+      "segment": "Convenience Seeker",
+      "topics": ["[Sentiment: Positive] Quick Delivery", "Product Assortment"]
     }
     """
     
@@ -62,9 +62,10 @@ def run_segmentation_pipeline(limit=50):
                 success_count += 1
                 if success_count % 10 == 0:
                     db.commit()
-                time.sleep(2) # 2-second delay for rate limit
             except Exception as item_error:
                 print(f"Error segmenting record {record.id}: {item_error}")
+            finally:
+                time.sleep(2) # 2-second delay for rate limit ALWAYS respected
                 
         db.commit()
         print(f"Successfully segmented {success_count} records.")
