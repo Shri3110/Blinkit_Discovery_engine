@@ -25,7 +25,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
         raise ValueError("No PINECONE_API_KEY found in .env")
         
     pc = Pinecone(api_key=api_key)
-    index_name = "blinkit-discovery"
+    index_name = "blinkit1"
     index = pc.Index(index_name)
     
     # Semantic Search

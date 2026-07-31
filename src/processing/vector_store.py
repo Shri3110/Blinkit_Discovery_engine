@@ -18,7 +18,7 @@ def run_vector_store_pipeline():
         return
         
     pc = Pinecone(api_key=api_key)
-    index_name = "blinkit-discovery"
+    index_name = "blinkit1"
     
     # Check if index exists
     if index_name not in [index.name for index in pc.list_indexes()]:
