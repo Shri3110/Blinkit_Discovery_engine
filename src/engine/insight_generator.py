@@ -20,7 +20,7 @@ def generate_insight(query: str, n_results: int = 10):
     print(f"Retrieving context for query: '{query}'")
     
     # 1. Retrieve from ChromaDB
-    chroma_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "chroma_db")
+    chroma_path = os.getenv("CHROMA_DB_PATH", os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "chroma_db"))
     client = chromadb.PersistentClient(path=chroma_path)
     
     collection = client.get_collection(
