@@ -111,11 +111,18 @@ def query_discovery_engine(question: str, top_k: int = 5):
     - Key Findings
     - Pain Points
     - Product Opportunities
+    - Recommended Actions
 
-    Keep all explanations extremely short and punchy. Use max 1-2 bullet points per section.
-    Do NOT use asterisks (*) or markdown formatting for bold/italics anywhere in your response.
-    Use standard numbered/bulleted lists using dashes (-). Do not include asterisks.
-    Do NOT use phrases like "Evidence used" or "Evidence:" in your response. Just present the insights naturally.
+    IMPORTANT GUIDELINES:
+    - Avoid vague generalizations. Be extremely specific.
+    - Directly reference exact scenarios, item types, or issues mentioned in the context.
+    - Provide highly actionable Product Opportunities and Recommended Actions that an engineering/design team could actually build.
+    - Keep explanations punchy and data-driven. Use max 2 bullet points per section.
+    
+    FORMATTING RULES:
+    - Do NOT use asterisks (*) or markdown formatting for bold/italics anywhere in your response.
+    - Use standard numbered/bulleted lists using dashes (-). Do not include asterisks.
+    - Do NOT use phrases like "Evidence used" or "Evidence:" in your response.
     """
     
     user_prompt = f"Product Question: {question}\n\nContext:\n{context_str}"
