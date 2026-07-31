@@ -13,7 +13,7 @@ def run_ingestion():
     print("Starting data ingestion...")
     fetch_google_play_reviews()
     # fetch_app_store_reviews() # Disabled due to Apple blocks
-    insert_synthetic_app_store_reviews()
+    # insert_synthetic_app_store_reviews() # Disabled to prevent infinite DB inflation on reload
     fetch_reddit_posts()
     ingest_dataset_sample()
     print("Data ingestion completed.")
