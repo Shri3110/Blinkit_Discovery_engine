@@ -10,8 +10,8 @@ _model = None
 def get_embedding_model():
     global _model
     if _model is None:
-        from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer('all-MiniLM-L6-v2')
+        from fastembed import TextEmbedding
+        _model = TextEmbedding(model_name='sentence-transformers/all-MiniLM-L6-v2')
     return _model
 
 def query_discovery_engine(question: str, top_k: int = 5):
@@ -22,7 +22,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
     
     # Generate query embedding
     model = get_embedding_model()
-    query_embedding = model.encode(question).tolist()
+    query_embedding = list(model.embed([question]))[0].tolist()
     
     # Connect to Pinecone
     api_key = os.getenv("PINECONE_API_KEY")
@@ -132,7 +132,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        model="llama3-8b-8192",
+        model="llama-3.3-70b-versatile",
         temperature=0.3,
         max_tokens=1500,
     )

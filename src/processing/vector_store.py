@@ -9,8 +9,8 @@ _model = None
 def get_embedding_model():
     global _model
     if _model is None:
-        from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer('all-MiniLM-L6-v2')
+        from fastembed import TextEmbedding
+        _model = TextEmbedding(model_name='sentence-transformers/all-MiniLM-L6-v2')
     return _model
 
 def run_vector_store_pipeline():
@@ -49,7 +49,7 @@ def run_vector_store_pipeline():
             
             # Generate embedding manually
             model = get_embedding_model()
-            embedding = model.encode(record.normalized_content).tolist()
+            embedding = list(model.embed([record.normalized_content]))[0].tolist()
             
             # Create pinecone vector object
             vectors_to_upsert.append({
