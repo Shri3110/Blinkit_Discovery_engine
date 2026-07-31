@@ -118,9 +118,9 @@ def get_stats():
 def get_reviews(limit: int = 50):
     db = SessionLocal()
     try:
-        # Fetch only original feedback from Google Play, ordered by recency
+        # Fetch only original feedback from Google Play that has been processed, ordered by recency
         reviews = db.query(RawData, ProcessedData)\
-            .outerjoin(ProcessedData, ProcessedData.raw_data_id == RawData.id)\
+            .join(ProcessedData, ProcessedData.raw_data_id == RawData.id)\
             .filter(RawData.source == "google_play")\
             .order_by(RawData.created_at.desc(), RawData.id.desc())\
             .limit(limit).all()
