@@ -118,10 +118,12 @@ def get_stats():
 def get_reviews(limit: int = 50):
     db = SessionLocal()
     try:
-        # Fetch only original feedback from Google Play that has been processed, ordered by recency
+        # Fetch only original feedback from Google Play that has been fully processed (segmented) and is meaningful in length
         reviews = db.query(RawData, ProcessedData)\
             .join(ProcessedData, ProcessedData.raw_data_id == RawData.id)\
             .filter(RawData.source == "google_play")\
+            .filter(ProcessedData.user_segment.isnot(None))\
+            .filter(func.length(RawData.content) > 15)\
             .order_by(RawData.created_at.desc(), RawData.id.desc())\
             .limit(limit).all()
         formatted_reviews = []
