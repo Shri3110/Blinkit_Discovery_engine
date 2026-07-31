@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Search, Sparkles, MessageSquare, Database, Users, BarChart2 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+const rawApiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = rawApiBase.replace(/\/$/, '');
 
 function App() {
   const [query, setQuery] = useState('');
@@ -10,20 +13,27 @@ function App() {
   const [stats, setStats] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [heatmapData, setHeatmapData] = useState([]);
+  
+  const COLORS = ['#8b5cf6', '#ec4899', '#10b981', '#F8CB46', '#3b82f6', '#f43f5e', '#f97316', '#14b8a6'];
+  const sentimentData = stats ? [
+    { name: 'Positive', value: stats.positive || 0, fill: '#10b981' },
+    { name: 'Neutral', value: stats.neutral || 0, fill: '#94a3b8' },
+    { name: 'Negative', value: stats.negative || 0, fill: '#f43f5e' }
+  ] : [];
 
   useEffect(() => {
     // Fetch stats and reviews on load
-    fetch('http://localhost:8000/api/stats')
+    fetch(`${API_BASE}/api/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error("Error fetching stats:", err));
 
-    fetch('http://localhost:8000/api/reviews?limit=20')
+    fetch(`${API_BASE}/api/reviews?limit=20`)
       .then(res => res.json())
       .then(data => setReviews(data))
       .catch(err => console.error("Error fetching reviews:", err));
 
-    fetch('http://localhost:8000/api/trends/heatmap')
+    fetch(`${API_BASE}/api/trends/heatmap`)
       .then(res => res.json())
       .then(data => setHeatmapData(data))
       .catch(err => console.error("Error fetching heatmap:", err));
@@ -37,7 +47,7 @@ function App() {
     setReport('');
     
     try {
-      const res = await fetch('http://localhost:8000/api/query', {
+      const res = await fetch(`${API_BASE}/api/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -50,7 +60,7 @@ function App() {
       }
     } catch (err) {
       console.error(err);
-      setReport("Failed to generate insight. Ensure FastAPI backend is running.");
+      setReport(`Failed to generate insight. Error: ${err.message}. Ensure VITE_API_URL is correct and backend is running.`);
     } finally {
       setLoading(false);
     }
@@ -62,6 +72,40 @@ function App() {
         <h1>Blinkit AI Discovery Engine</h1>
         <p>Uncovering deeper user insights with RAG & Vector Search</p>
       </header>
+
+      {/* KPI Dashboard */}
+      {stats && (
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value">{stats.total_reviews || 0}</div>
+            <div className="stat-label">Total Reviews</div>
+          </div>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value" style={{ color: '#10b981' }}>{stats.positive || 0}</div>
+            <div className="stat-label">Positive</div>
+          </div>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value" style={{ color: '#f43f5e' }}>{stats.negative || 0}</div>
+            <div className="stat-label">Negative</div>
+          </div>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value" style={{ color: '#94a3b8' }}>{stats.neutral || 0}</div>
+            <div className="stat-label">Neutral</div>
+          </div>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value" style={{ color: '#8b5cf6' }}>{stats.topics_identified || 0}</div>
+            <div className="stat-label">Topics Found</div>
+          </div>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value" style={{ color: '#F8CB46' }}>{stats.user_segments || 0}</div>
+            <div className="stat-label">Segments</div>
+          </div>
+          <div className="glass-panel stat-card" style={{ padding: '16px' }}>
+            <div className="stat-value" style={{ color: '#3b82f6' }}>{stats.sources_analysed || 0}</div>
+            <div className="stat-label">Sources</div>
+          </div>
+        </section>
+      )}
 
       {/* RAG Query Panel */}
       <section className="glass-panel full-width" style={{ marginBottom: '32px' }}>
@@ -115,6 +159,58 @@ function App() {
         </div>
       </section>
 
+      {/* New Visualizations Row */}
+      {stats && (
+        <div className="dashboard-grid">
+          {/* Sentiment Overview */}
+          <section className="glass-panel">
+            <h2><BarChart2 size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}/> Sentiment Overview</h2>
+            <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+              <ResponsiveContainer>
+                <BarChart data={sentimentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                  <XAxis dataKey="name" stroke="#94a3b8" />
+                  <YAxis stroke="#94a3b8" />
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#f8fafc' }} cursor={{fill: 'rgba(255,255,255,0.05)'}}/>
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {sentimentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+
+          {/* User Personas Donut */}
+          <section className="glass-panel">
+            <h2><Users size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', color: '#8b5cf6' }}/> User Personas Distribution</h2>
+            <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={stats.segments}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={110}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {stats.segments.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#f8fafc' }} />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        </div>
+      )}
+
       <div className="dashboard-grid">
         {/* Suggested Queries Panel */}
         <section className="glass-panel">
@@ -152,9 +248,27 @@ function App() {
           </div>
         </section>
 
-        {/* Evidence Viewer */}
+        {/* Evidence Viewer (Conditionally rendered) */}
+        {evidence.length > 0 && (
+          <section className="glass-panel" style={{ marginBottom: '32px' }}>
+            <h2><MessageSquare size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}/> Query Evidence</h2>
+            <div className="reviews-container">
+              {evidence.map(review => (
+                <div key={review.id || review.content} className="review-card">
+                  <p className="review-text">"{review.content}"</p>
+                  <div className="review-tags">
+                    {review.segment && <span className="badge segment">{review.segment}</span>}
+                    {review.topic && <span className="badge topic">{review.topic}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Recent Feedback */}
         <section className="glass-panel">
-          <h2><MessageSquare size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}/> Recent Feedback</h2>
+          <h2><MessageSquare size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', color: '#3b82f6' }}/> Recent Feedback</h2>
           <div className="reviews-container">
             {reviews.map(review => (
               <div key={review.id} className="review-card">
@@ -167,7 +281,7 @@ function App() {
                 </div>
               </div>
             ))}
-            {reviews.length === 0 && <p>No reviews fetched.</p>}
+            {reviews.length === 0 && <p>No feedback available. You may need to refresh the page.</p>}
           </div>
         </section>
       </div>
