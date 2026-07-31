@@ -147,22 +147,6 @@ function App() {
           <div className="markdown-body">
             <ReactMarkdown>{report}</ReactMarkdown>
           </div>
-
-          {evidence.length > 0 && (
-            <details>
-              <summary><Database size={16} /> View RAG Evidence ({evidence.length} sources)</summary>
-              <div className="reviews-container" style={{ marginTop: '16px', maxHeight: '300px' }}>
-                {evidence.map((review, i) => (
-                  <div key={i} className="review-card" style={{ padding: '12px 0' }}>
-                    <p className="review-text" style={{ fontSize: '0.85rem' }}>"{review.content}"</p>
-                    <div className="review-tags">
-                      {review.segment && <span className="badge segment">{review.segment}</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </details>
-          )}
         </section>
       )}
 
@@ -223,7 +207,7 @@ function App() {
             return (
               <div key={review.id} className="review-card">
                 <div className="review-tags" style={{ marginBottom: '4px' }}>
-                  <span className={`badge ${sentiment}`}>{sentiment}</span>
+                  {sentiment !== 'neutral' && <span className={`badge ${sentiment}`}>{sentiment}</span>}
                   {review.segment && <span className="badge segment">{review.segment}</span>}
                 </div>
                 <p className="review-text">"{review.content}"</p>
