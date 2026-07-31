@@ -136,7 +136,7 @@ def get_reviews(limit: int = 50):
                     topics = []
             formatted_reviews.append({
                 "id": raw.id,
-                "content": raw.content,
+                "content": processed.normalized_content,
                 "segment": processed.user_segment if processed else "Unprocessed",
                 "topics": topics
             })
