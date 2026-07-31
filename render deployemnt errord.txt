@@ -1,0 +1,39 @@
+The Render deployment is failing because of conflicting Python dependencies.
+
+The build logs show:
+
+ERROR:
+Cannot install sentence-transformers==2.5.1 and sentence-transformers==5.6.0 because these package versions have conflicting dependencies.
+
+Please fix the dependency conflict by doing the following:
+
+1. Search the entire repository for every reference to sentence-transformers.
+
+2. Keep only ONE version across the entire project.
+
+3. Since the project already uses the newer embedding stack, keep:
+   sentence-transformers==5.6.0
+
+4. Remove every occurrence of:
+   sentence-transformers==2.5.1
+
+5. Check:
+   - requirements.txt
+   - requirements-render.txt
+   - pyproject.toml
+   - poetry.lock
+   - any install scripts
+   - Dockerfile
+   - setup.py
+
+6. Ensure no duplicate dependencies exist.
+
+7. Regenerate the lock file if necessary.
+
+8. Commit the fix.
+
+9. Redeploy Render.
+
+Do not modify any application logic.
+
+Only resolve the dependency conflict until the Render deployment succeeds.

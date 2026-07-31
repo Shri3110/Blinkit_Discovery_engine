@@ -1,0 +1,261 @@
+Here is a detailed prompt you can paste directly into Antigravity.
+
+---
+
+## Prompt
+
+You are a Senior Product Designer and Product Manager conducting a UX review for a Product Management portfolio project.
+
+The application is called **Blinkit AI Discovery Engine**.
+
+Its purpose is to help Product Managers analyze thousands of user reviews using AI, RAG, Vector Search and semantic clustering to generate actionable product insights.
+
+Your task is to redesign and improve the dashboard without changing the core functionality.
+
+## Objectives
+
+Evaluate the dashboard based on:
+
+* Information hierarchy
+* Product thinking
+* PM usability
+* Visual design
+* Executive readability
+* Data storytelling
+* Decision making
+
+Do NOT redesign it as a generic analytics dashboard.
+
+Design it as something a Product Manager would actually use during product discovery.
+
+---
+
+## Current Problems
+
+### 1. User Personas Distribution
+
+The current donut chart contains 25+ personas.
+
+It is impossible to read.
+
+The legend occupies half of the dashboard.
+
+The visualization adds almost no value.
+
+Replace it with something much more useful.
+
+Possible options:
+
+* Top 8 personas only
+* Horizontal ranked bar chart
+* Treemap
+* Collapsible table
+* Persona cards
+* Group similar personas together
+
+Your recommendation should maximize readability.
+
+---
+
+### 2. Query Evidence
+
+The Query Evidence panel consumes significant space.
+
+It simply displays raw reviews.
+
+It duplicates information already available in Recent Feedback.
+
+Recommend whether it should:
+
+* be completely removed
+* moved into a modal
+* become expandable
+* appear only after clicking "View Evidence"
+
+The dashboard should prioritize insights rather than raw data.
+
+---
+
+### 3. Executive Summary
+
+Improve typography.
+
+Highlight:
+
+* Top opportunity
+* Biggest pain point
+* Confidence Score
+* Sources Used
+
+instead of displaying long paragraphs.
+
+---
+
+### 4. AI Insight Section
+
+Make this the hero section of the dashboard.
+
+Suggestions:
+
+* Better spacing
+* Better typography
+* Cards instead of plain text
+* Highlight recommendations
+* Color code positive vs negative findings
+
+---
+
+### 5. Heatmap
+
+The current chart is difficult to interpret.
+
+Suggest a better visualization for:
+
+Topics discussed across user segments.
+
+Possible alternatives:
+
+* Matrix heatmap
+* Bubble chart
+* Interactive stacked bars
+* Top 5 topics per segment
+
+---
+
+### 6. Suggested Queries
+
+Improve styling.
+
+Make them look like clickable AI prompts similar to:
+
+ChatGPT
+
+Perplexity
+
+Claude
+
+Gemini
+
+---
+
+### 7. Recent Feedback
+
+Improve usability.
+
+Possible improvements:
+
+* Filters
+* Sentiment badges
+* Persona badges
+* Expandable cards
+* Infinite scrolling
+
+---
+
+### 8. KPI Cards
+
+Evaluate whether these KPIs are sufficient.
+
+Current cards:
+
+* Total Reviews
+* Positive
+* Negative
+* Neutral
+* Topics Found
+* Segments
+* Sources
+
+Suggest replacing or adding metrics such as:
+
+* Average Rating
+* AI Confidence
+* Top Pain Point
+* Top Opportunity
+* Most Mentioned Feature
+* Discovery Score
+* User Satisfaction Index
+
+---
+
+### 9. Overall Layout
+
+Reorganize the dashboard into logical sections.
+
+Example:
+
+Header
+
+↓
+
+KPI Cards
+
+↓
+
+Ask AI
+
+↓
+
+Executive Insights
+
+↓
+
+Product Opportunities
+
+↓
+
+Visual Analytics
+
+↓
+
+User Personas
+
+↓
+
+Recent Feedback
+
+---
+
+### 10. Product Thinking
+
+Recommend features that would impress Product Managers during interviews.
+
+Examples:
+
+* Export PRD
+* Export Feature Requests
+* Export Jira Tickets
+* AI-generated User Stories
+* Feature Prioritization Matrix
+* Opportunity Score
+* Feature Impact vs Effort Matrix
+* Persona Explorer
+* Review Search
+* Topic Drill Down
+* Ask Follow-up Questions
+
+---
+
+## Constraints
+
+* Keep the existing dark theme.
+* Do not change the backend.
+* Do not remove the AI search functionality.
+* Improve only UX, layout, hierarchy, and visualizations.
+* Focus on making the dashboard look like a professional PM Analytics platform rather than an academic dashboard.
+
+---
+
+## Deliverables
+
+Provide:
+
+1. Complete UX critique.
+2. New dashboard wireframe.
+3. Component-by-component redesign.
+4. Which components should be removed.
+5. Which charts should be replaced.
+6. New layout hierarchy.
+7. UI improvement recommendations.
+8. Product feature recommendations.
+9. A final mockup description detailed enough for implementation in React.

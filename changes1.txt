@@ -1,0 +1,85 @@
+You are working on my existing Blinkit Smart Discovery Engine project.
+
+Do NOT rewrite or redesign the application.
+
+The application is already deployed and working except for one section in the Discovery Engine dashboard.
+
+Current Issue:
+
+1. "Ask the AI" always shows:
+   "Failed to generate insight. Ensure FastAPI backend is running."
+
+2. "Topics Discussed by User Segment (Heatmap)" remains stuck on:
+   "Loading heatmap data..."
+
+3. "Recent Feedback" always displays:
+   "No reviews fetched."
+
+The rest of the application works correctly.
+
+I want you to perform a root cause analysis and fix ONLY these issues.
+
+Tasks:
+
+• Trace the frontend API calls made by:
+  - Ask the AI
+  - Heatmap
+  - Recent Feedback
+
+• Verify that the corresponding FastAPI endpoints actually exist.
+
+• Check whether:
+  - endpoint paths match
+  - HTTP methods match
+  - request payloads match
+  - response schemas match
+
+• Verify CORS configuration.
+
+• Verify Railway environment variables.
+
+• Check whether the frontend API URL points to the deployed Railway backend.
+
+• Check whether any endpoint names changed during deployment.
+
+• Check whether frontend is calling localhost instead of Railway.
+
+• Check if these endpoints are missing from the deployed FastAPI server.
+
+• If an endpoint is missing,
+  create ONLY the missing endpoint without modifying existing working APIs.
+
+• If the endpoint exists,
+  identify why it fails.
+
+• Verify database connections.
+
+• Verify review loading logic.
+
+• Verify RAG pipeline.
+
+• Verify embedding loading.
+
+• Verify vector database initialization.
+
+• Verify Gemini/OpenAI API key loading.
+
+• Verify backend startup logs.
+
+Do NOT make assumptions.
+
+For every issue provide:
+
+1. Root Cause
+2. Exact file causing it
+3. Exact code change
+4. Why it broke
+5. Fix
+
+Do NOT regenerate the project.
+
+Do NOT redesign the UI.
+
+Do NOT modify working features.
+
+Only fix the Discovery Engine dashboard.

@@ -1,0 +1,33 @@
+The Render deployment is failing because of a dependency conflict involving urllib3.
+
+The build logs show:
+
+pinecone-client 3.2.2 depends on urllib3>=1.26.0
+but requirements.txt pins:
+urllib3==1.25.11
+
+Please fix the dependency conflict without changing the application logic.
+
+Steps:
+
+Search the entire repository for every reference to urllib3.
+
+Remove the hard pin:
+
+urllib3==1.25.11
+Either:
+upgrade it to a compatible version (for example urllib3>=1.26,<3), or
+remove the explicit urllib3 dependency entirely and allow pip to resolve it automatically.
+Verify compatibility with:
+pinecone-client
+requests
+kubernetes
+Check all dependency files:
+requirements.txt
+requirements-render.txt
+pyproject.toml
+poetry.lock
+Dockerfile
+Remove any duplicate or conflicting dependency entries.
+Commit the changes and redeploy to Render.
+Continue fixing dependency conflicts until the deployment succeeds.

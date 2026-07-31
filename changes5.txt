@@ -1,0 +1,35 @@
+My Blinkit AI Discovery Engine uses Groq as the LLM for answering user queries over review data. Currently, the AI produces inconsistent answers for identical questions, occasionally hallucinates, changes recommendations between runs, and varies its formatting.
+
+Refactor the AI pipeline to make it behave like a deterministic Product Intelligence system rather than a conversational chatbot.
+
+Requirements
+
+Deterministic Responses
+
+Configure the LLM for deterministic output (temperature = 0 or as close to zero as supported).
+Identical questions over the same dataset must produce nearly identical responses.
+
+Strict RAG Grounding
+
+Answer ONLY from the retrieved review context.
+Never use the model's pretrained knowledge.
+Never fabricate insights, statistics, percentages, review counts, personas, or product opportunities.
+If evidence is insufficient, explicitly return "Insufficient evidence found in the retrieved reviews."
+
+Improved Retrieval
+
+Retrieve enough highly relevant review chunks before generating a response.
+Rank retrieved results by semantic similarity and ignore low-confidence matches.
+Ensure retrieved reviews are actually relevant to the user's question.
+
+Evidence-Based Reasoning
+
+Every insight must be supported by retrieved reviews.
+Recommendations should only be generated when supported by sufficient evidence.
+Avoid assumptions and speculative conclusions.
+
+Important
+Do not change the frontend UI.
+Do not change the database schema.
+Do not change the dashboard design.
+Only improve the RAG pipeline, prompt engineering, retrieval quality, response validation, and LLM configuration to eliminate hallucinations and improve consistency.

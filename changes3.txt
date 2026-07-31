@@ -1,0 +1,37 @@
+My application builds successfully on Render, but the deployment fails with Exit Status 137 (Out Of Memory).
+
+Current situation:
+- Build succeeds successfully.
+- Dependencies install successfully.
+- Render starts with:
+  uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
+- The service never binds to the port.
+- After about a minute the process exits with status 137.
+- This indicates the application is consuming too much memory during startup.
+
+Please inspect the entire codebase and perform the following:
+
+1. Find every place where large AI models are loaded during application startup.
+   Examples include:
+   - SentenceTransformer(...)
+   - AutoModel.from_pretrained(...)
+   - pipeline(...)
+   - torch.load(...)
+   - embedding models
+   - HuggingFace models
+
+2. Do NOT load these models globally when FastAPI starts.
+
+3. Refactor them into lazy loading so models are only loaded when an endpoint actually needs them.
+
+4. If embeddings are only used for Pinecone, replace local SentenceTransformer embeddings with Pinecone Inference embeddings or another API-based embedding provider so that PyTorch does not need to load at startup.
+
+5. Reduce startup memory usage as much as possible.
+
+6. Ensure the FastAPI server starts immediately and binds to Render's assigned PORT before any expensive initialization.
+
+7. Keep all existing API endpoints working.
+
+8. Explain every file you modified and why.
+
+Do not change any business logic unless required for deployment.

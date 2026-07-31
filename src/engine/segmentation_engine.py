@@ -30,7 +30,7 @@ def infer_segmentation(content):
             {"role": "user", "content": f"Feedback: {content}"}
         ],
         model="llama-3.1-8b-instant",
-        temperature=0.1,
+        temperature=0.0,
         max_tokens=150,
         response_format={"type": "json_object"}
     )

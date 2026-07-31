@@ -1,0 +1,23 @@
+The Render deployment is still failing due to a dependency conflict.
+
+Current conflict:
+
+- app-store-scraper==0.3.5 requires requests==2.23.0
+- The project now requires requests>=2.31.0 for Pinecone and other modern libraries.
+
+Do not continue patching dependencies one by one.
+
+Instead:
+
+1. Search the project and identify whether app-store-scraper is actually used anywhere.
+2. If it is NOT used:
+   - Remove app-store-scraper from requirements.txt.
+   - Remove any unused imports.
+3. If it IS used:
+   - Replace it with a maintained alternative that supports modern requests versions, or isolate it so it does not block the backend deployment.
+4. Regenerate requirements.txt from the actual imports used in the project.
+5. Remove duplicate, obsolete, and conflicting packages.
+6. Verify that `pip install -r requirements.txt` succeeds on Python 3.11.
+7. Redeploy Render.
+
+Do not modify application logic. The goal is to produce a clean, conflict-free dependency file that works with Pinecone, Supabase, FastAPI, and the current RAG pipeline.

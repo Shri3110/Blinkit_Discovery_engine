@@ -1,0 +1,33 @@
+The backend now builds successfully.
+
+However the application crashes during startup because SQLAlchemy cannot connect to Supabase.
+
+Current error:
+
+sqlalchemy.exc.OperationalError
+
+connection to
+db.hxmuejleyyrtdrrmzhje.supabase.co:5432
+
+failed:
+Network is unreachable
+
+Please fix this by:
+
+1. Verify which database connection string is currently being used.
+
+2. If the application is using the Direct PostgreSQL connection,
+replace it with the Supabase Transaction Pooler connection string.
+
+3. Ensure DATABASE_URL uses the Pooler endpoint rather than the direct database endpoint.
+
+4. Verify SSL parameters are correct.
+
+5. Ensure SQLAlchemy creates the engine using the Render environment variable.
+
+6. Test the database connection before application startup.
+
+7. Redeploy Render.
+
+Do not change application logic.
+Only fix the database connectivity.

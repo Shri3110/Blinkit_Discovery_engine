@@ -1,0 +1,46 @@
+# Blinkit AI Discovery - User Feedback Analysis & Hypotheses
+
+## Overview
+Based on an analysis of user feedback across multiple channels (Reddit, community forums, Twitter/X, app stores, and user interviews), the following hypotheses address why users repeatedly buy from the same categories and what prevents them from exploring new ones. 
+
+## Hypotheses on User Purchasing Behavior
+
+| Hypothesis | Paraphrased Supporting Evidence | Source(s) | Confidence Level | Directly Stated / Inference |
+| :--- | :--- | :--- | :--- | :--- |
+| **Users view Quick Commerce strictly as a "digital kirana store" for immediate needs, not a discovery platform.** | Users are in a rush and use the app out of habit for daily essentials (milk, bread) or emergencies. For non-grocery items, their instinct is to open established e-commerce apps like Amazon. | User Research (User A), Reddit (QuickCart_Pro), Google Play Store (Sarah M., Vikram S.) | High | Directly Stated |
+| **Trust deficit, poor return policies, and bad customer service prevent high-value and electronic purchases.** | Users hesitate to buy expensive items (like phones or electronics) because of difficult return processes, experiences with open-box items, and a lack of detailed specs or reviews on the platform. | Reddit (TechGeek99, DelhiMom), Google Play Store (Arjun K.), Apple App Store (Anjali T., Neha P.) | High | Directly Stated |
+| **Poor UI categorization and broken search mechanics hide non-grocery inventory, preventing exploration.** | The app caters to exact searches rather than browsing. Users struggle to filter by brand, search returns irrelevant items, and new categories (like gifting or beauty) are hidden or mixed with unrelated items. | Social Media (@Riya_Tweets), Forums (SaveRupee), Google Play Store (Priya D., Vikram S.), Apple App Store (Karan V.) | High | Directly Stated |
+| **Fears over authenticity, quality, and expiry dates severely limit purchases in the Health and Beauty categories.** | Users worry about receiving near-expiry items or fake products. They prefer specialized platforms (e.g., Nykaa, 1mg) with verified supply chains for cosmetics and medicines. | Forums (SaveRupee), Apple App Store (Anjali T.), User Research (User B) | High | Directly Stated |
+| **Inconsistent quality in core categories (fresh produce) spills over and destroys the appetite for cross-category experimentation.** | Users who receive poor quality vegetables or damaged groceries lose trust in the platform's overall quality control, leading them to explicitly refuse trying new, unrelated categories. | Reddit (QuickCart_Pro), Forums (DealHunter), Google Play Store (Vikram S.), Apple App Store (Rohit M.) | High | Directly Stated |
+| **Contextual, well-timed, and urgent nudges can successfully break category habits.** | Pushing the right product at the exact moment of need (e.g., diapers late at night) or showing related items during a specific search (e.g., board games when searching for cards) effectively drives cross-category discovery. | User Research (User B), Social Media (@Riya_Tweets), Reddit (midnight_craver) | High | Inference |
+
+---
+
+## Additional Behavioral Insights
+
+### 1. How Users Discover Products Today
+Discovery on Blinkit currently happens almost entirely **by accident** or through **high-urgency situations**. Users stumble upon new categories (like pet food or board games) only when they mis-type a search, search for a loosely related item, or receive a highly contextual push notification. The UI does not naturally encourage scrolling or "window shopping."
+
+### 2. The Role of Habit & Routine
+Habit is the strongest driver of Blinkit's usage. Users have a rigid mental model of the app as a utility for weekly staples or last-minute top-ups. Because they know exactly what they want when they open the app, they operate on "autopilot," bypassing banners and non-essential aisles entirely.
+
+### 3. Reassurance Needed Before Trying a New Category
+To branch out into categories like electronics, premium beauty, or health, users require:
+- **Verified Authenticity:** Badges or guarantees that premium products (like Mac or Cerave) are sourced directly from brands.
+- **Frictionless Returns:** A generous, no-questions-asked return policy for electronics, mitigating the fear of being stuck with defective items.
+- **Rich Product Information:** Detailed specs, user reviews, and better filtering (by brand, material, etc.) right on the product page.
+- **Consistent Core Quality:** A track record of delivering high-quality fresh produce to build baseline trust.
+
+### 4. Recurring Frustrations
+- Broken, irrelevant, or highly literal search results.
+- Lack of filtering options for non-grocery items.
+- Receiving damaged or open-box premium items.
+- Automated, unhelpful bot responses from customer support when resolving high-value product issues.
+- Hidden costs (surge charges, handling fees) at checkout.
+
+### 5. Which User Types Are More Likely to Experiment
+Users in **urgent, high-stakes situations** are the most likely to bypass their reservations and experiment with new categories. This includes:
+- **Late-Night Shoppers / Parents:** Needing immediate solutions (diapers, baby food).
+- **Working Professionals:** Experiencing a mid-workday crisis (broken mouse, charger).
+- **Event Planners / Hosts:** Needing last-minute party supplies (games, ice, mixers).
+- **Emergency Groomers:** Last-minute needs before events (straightener, makeup wipes).

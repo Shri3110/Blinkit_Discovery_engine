@@ -1,0 +1,19 @@
+he Render deployment is still failing due to dependency conflicts.
+
+The current conflict is:
+
+requests==2.23.0 requires urllib3 < 1.26
+pinecone-client==3.2.2 requires urllib3 >= 1.26
+
+Please resolve this by updating the dependency versions rather than downgrading Pinecone.
+
+Steps:
+
+Search the repository for every occurrence of requests==2.23.0.
+Upgrade Requests to a modern compatible version (for example requests>=2.31.0).
+Remove any dependency pin that forces an old urllib3 version.
+Ensure Requests, urllib3, Kubernetes, and Pinecone Client all resolve successfully.
+Run dependency resolution locally and ensure pip install -r requirements.txt succeeds without conflicts.
+Commit the updated dependency file(s).
+Redeploy Render.
+Continue resolving any remaining dependency conflicts until the backend deploys successfully.

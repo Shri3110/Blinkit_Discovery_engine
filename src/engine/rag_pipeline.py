@@ -36,12 +36,17 @@ def query_discovery_engine(question: str, top_k: int = 5):
     # Semantic Search
     results = index.query(
         vector=query_embedding,
-        top_k=top_k,
+        top_k=max(top_k, 20),
         include_metadata=True
     )
     
-    if not results.matches:
-        return "No relevant insights found in the database."
+    matches = [m for m in results.matches if m.score > 0.3]
+    
+    if not matches:
+        return {
+            "report": "Insufficient evidence found in the retrieved reviews.",
+            "evidence": []
+        }
         
     db = SessionLocal()
     evidence = []
@@ -50,12 +55,12 @@ def query_discovery_engine(question: str, top_k: int = 5):
     supporting_review_count = 0
     
     try:
-        raw_data_ids = [match.metadata.get("raw_data_id") for match in results.matches if match.metadata and match.metadata.get("raw_data_id")]
+        raw_data_ids = [match.metadata.get("raw_data_id") for match in matches if match.metadata and match.metadata.get("raw_data_id")]
         
         processed_records = {r.raw_data_id: r for r in db.query(ProcessedData).filter(ProcessedData.raw_data_id.in_(raw_data_ids)).all()}
         raw_records = {r.id: r for r in db.query(RawData).filter(RawData.id.in_(raw_data_ids)).all()}
         
-        for i, match in enumerate(results.matches):
+        for i, match in enumerate(matches):
             doc = match.metadata.get("text", "")
             context_blocks.append(f"- {doc}")
             
@@ -89,10 +94,10 @@ def query_discovery_engine(question: str, top_k: int = 5):
             include_metadata=False
         )
         supporting_review_count = sum(1 for match in broader_results.matches if match.score > 0.3)
-        if supporting_review_count < len(results.matches):
-            supporting_review_count = len(results.matches)
+        if supporting_review_count < len(matches):
+            supporting_review_count = len(matches)
             
-        scores = [match.score for match in results.matches]
+        scores = [match.score for match in matches]
         avg_score = sum(scores) / len(scores) if scores else 0
         confidence_score = max(0, min(100, int(avg_score * 100)))
             
@@ -103,8 +108,15 @@ def query_discovery_engine(question: str, top_k: int = 5):
     
     # Ask LLM to synthesize
     system_prompt = """
-    You are an expert AI Product Manager for Blinkit.
+    You are an expert deterministic AI Product Manager for Blinkit.
     Analyze the provided user contexts to answer the PM's question.
+    
+    STRICT RAG GROUNDING RULES:
+    1. Answer ONLY using the information explicitly present in the retrieved review context.
+    2. NEVER use your pretrained knowledge or outside information.
+    3. NEVER fabricate or hallucinate insights, statistics, percentages, review counts, personas, or product opportunities.
+    4. Every insight and recommendation must be directly supported by the retrieved reviews. Do not make assumptions or speculative conclusions.
+    5. If the provided context does not contain sufficient evidence to answer the query, you MUST explicitly return exactly: "Insufficient evidence found in the retrieved reviews."
     
     Structure your answer as a highly concise Product Insight Report.
     Use EXACTLY the following headings (omit any that are completely irrelevant):
@@ -134,18 +146,25 @@ def query_discovery_engine(question: str, top_k: int = 5):
             {"role": "user", "content": user_prompt}
         ],
         model="llama-3.3-70b-versatile",
-        temperature=0.3,
+        temperature=0.0,
         max_tokens=1500,
     )
     
     raw_content = response.choices[0].message.content.strip()
+    
+    if "Insufficient evidence" in raw_content:
+        return {
+            "report": "Insufficient evidence found in the retrieved reviews.",
+            "evidence": []
+        }
+        
     clean_content = raw_content.replace('*', '').replace('- ', '')
     
     source_dist_str = ", ".join([f"{k}: {v}" for k, v in source_distribution.items()])
     
     evidence_layer_text = (
         f"\n\n--- Evidence Layer ---\n"
-        f"Evidence Count: {len(results.matches)}\n"
+        f"Evidence Count: {len(matches)}\n"
         f"Confidence Score: {confidence_score}%\n"
         f"Source Distribution: {source_dist_str}\n"
         f"Supporting Review Count: {supporting_review_count}\n"
