@@ -118,24 +118,24 @@ def get_stats():
 def get_reviews(limit: int = 50):
     db = SessionLocal()
     try:
-        # Fetch only real feedback (Google Play & Reddit), ignore synthetic/dataset samples
-        reviews = db.query(ProcessedData)\
-            .join(RawData, ProcessedData.raw_data_id == RawData.id)\
-            .filter(RawData.source.in_(["google_play", "reddit"]))\
+        # Fetch only original feedback from Google Play, ordered by recency
+        reviews = db.query(RawData, ProcessedData)\
+            .outerjoin(ProcessedData, ProcessedData.raw_data_id == RawData.id)\
+            .filter(RawData.source == "google_play")\
             .order_by(RawData.created_at.desc(), RawData.id.desc())\
             .limit(limit).all()
         formatted_reviews = []
-        for r in reviews:
-            topics = r.topic_tags
+        for raw, processed in reviews:
+            topics = processed.topic_tags if processed else []
             if isinstance(topics, str):
                 try:
                     topics = json.loads(topics)
                 except:
                     topics = []
             formatted_reviews.append({
-                "id": r.id,
-                "content": r.normalized_content,
-                "segment": r.user_segment,
+                "id": raw.id,
+                "content": raw.content,
+                "segment": processed.user_segment if processed else "Unprocessed",
                 "topics": topics
             })
         return formatted_reviews
