@@ -1,25 +1,31 @@
 import os
-import chromadb
-from chromadb.utils import embedding_functions
+import time
+from pinecone import Pinecone
+from sentence_transformers import SentenceTransformer
 from src.db.database import SessionLocal
 from src.db.models import ProcessedData
 
-# Use a lightweight sentence-transformer model by default
-# This runs locally and doesn't require an API key, saving costs!
-default_ef = embedding_functions.DefaultEmbeddingFunction()
+# Load the local embedding model (same model Chroma used natively)
+# Dimensions: 384
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def run_vector_store_pipeline():
-    print("Starting Vector Store Pipeline (ChromaDB)...")
+    print("Starting Vector Store Pipeline (Pinecone)...")
     
-    # Initialize ChromaDB persistent client
-    chroma_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "chroma_db")
-    client = chromadb.PersistentClient(path=chroma_path)
+    api_key = os.getenv("PINECONE_API_KEY")
+    if not api_key:
+        print("PINECONE_API_KEY is not set. Skipping vector store ingestion.")
+        return
+        
+    pc = Pinecone(api_key=api_key)
+    index_name = "blinkit-discovery"
     
-    # Get or create collection
-    collection = client.get_or_create_collection(
-        name="reviews_collection",
-        embedding_function=default_ef
-    )
+    # Check if index exists
+    if index_name not in [index.name for index in pc.list_indexes()]:
+        print(f"Error: Pinecone index '{index_name}' does not exist. Please create it with 384 dimensions and cosine metric.")
+        return
+        
+    index = pc.Index(index_name)
     
     db = SessionLocal()
     try:
@@ -32,29 +38,36 @@ def run_vector_store_pipeline():
             
         print(f"Found {len(pending_records)} pending records for embedding. Processing...")
         
-        documents = []
-        metadatas = []
-        ids = []
+        vectors_to_upsert = []
         
         for record in pending_records:
             doc_id = f"doc_{record.id}"
             
-            documents.append(record.normalized_content)
-            metadatas.append({"raw_data_id": record.raw_data_id})
-            ids.append(doc_id)
+            # Generate embedding manually
+            embedding = model.encode(record.normalized_content).tolist()
             
-            # Update DB record with the ChromaDB id
+            # Create pinecone vector object
+            vectors_to_upsert.append({
+                "id": doc_id,
+                "values": embedding,
+                "metadata": {
+                    "raw_data_id": record.raw_data_id,
+                    "text": record.normalized_content
+                }
+            })
+            
+            # Update DB record with the Pinecone id
             record.embedding_id = doc_id
             
-        # Add to ChromaDB in batches (Chroma handles batching internally, but max batch size is usually 41666)
-        collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            ids=ids
-        )
+        # Add to Pinecone in batches of 100
+        batch_size = 100
+        for i in range(0, len(vectors_to_upsert), batch_size):
+            batch = vectors_to_upsert[i:i + batch_size]
+            index.upsert(vectors=batch)
+            time.sleep(0.5) # Slight delay to avoid rate limits
         
         db.commit()
-        print(f"Successfully generated embeddings and stored {len(pending_records)} records in ChromaDB.")
+        print(f"Successfully generated embeddings and stored {len(pending_records)} records in Pinecone.")
         
     except Exception as e:
         print(f"Error in vector store pipeline: {e}")

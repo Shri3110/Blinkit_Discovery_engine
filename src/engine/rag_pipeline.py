@@ -1,12 +1,12 @@
 import os
-import chromadb
-from chromadb.utils import embedding_functions
+from pinecone import Pinecone
+from sentence_transformers import SentenceTransformer
 from groq import Groq
 from src.db.database import SessionLocal
-from src.db.models import ProcessedData
+from src.db.models import ProcessedData, RawData
 
-# Same lightweight embedding model as vector_store.py
-default_ef = embedding_functions.DefaultEmbeddingFunction()
+# Load the local embedding model
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_ID")
 
@@ -16,37 +16,83 @@ def query_discovery_engine(question: str, top_k: int = 5):
         
     print(f"Querying Discovery Engine: '{question}'")
     
-    # Connect to ChromaDB
-    chroma_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "chroma_db")
-    client = chromadb.PersistentClient(path=chroma_path)
-    collection = client.get_collection(name="reviews_collection", embedding_function=default_ef)
+    # Generate query embedding
+    query_embedding = model.encode(question).tolist()
+    
+    # Connect to Pinecone
+    api_key = os.getenv("PINECONE_API_KEY")
+    if not api_key:
+        raise ValueError("No PINECONE_API_KEY found in .env")
+        
+    pc = Pinecone(api_key=api_key)
+    index_name = "blinkit-discovery"
+    index = pc.Index(index_name)
     
     # Semantic Search
-    results = collection.query(
-        query_texts=[question],
-        n_results=top_k
+    results = index.query(
+        vector=query_embedding,
+        top_k=top_k,
+        include_metadata=True
     )
     
-    if not results['documents'] or not results['documents'][0]:
+    if not results.matches:
         return "No relevant insights found in the database."
         
-    retrieved_docs = results['documents'][0]
-    metadata_list = results['metadatas'][0]
-    
-    # We could also fetch user segments from the SQLite DB if needed,
-    # but the normalized content is already in ChromaDB!
-    
-    # Construct Context
-    context_blocks = []
+    db = SessionLocal()
     evidence = []
-    for i, doc in enumerate(retrieved_docs):
-        context_blocks.append(f"- {doc}")
-        evidence.append({
-            "id": metadata_list[i].get("id"),
-            "content": doc,
-            "segment": metadata_list[i].get("segment", "Unknown"),
-            "topic": metadata_list[i].get("topic", "None")
-        })
+    context_blocks = []
+    source_distribution = {}
+    supporting_review_count = 0
+    
+    try:
+        raw_data_ids = [match.metadata.get("raw_data_id") for match in results.matches if match.metadata and match.metadata.get("raw_data_id")]
+        
+        processed_records = {r.raw_data_id: r for r in db.query(ProcessedData).filter(ProcessedData.raw_data_id.in_(raw_data_ids)).all()}
+        raw_records = {r.id: r for r in db.query(RawData).filter(RawData.id.in_(raw_data_ids)).all()}
+        
+        for i, match in enumerate(results.matches):
+            doc = match.metadata.get("text", "")
+            context_blocks.append(f"- {doc}")
+            
+            raw_id = match.metadata.get("raw_data_id")
+            
+            segment = "Unknown"
+            topic = "None"
+            source = "Unknown"
+            
+            if raw_id:
+                if raw_id in processed_records:
+                    segment = processed_records[raw_id].user_segment or "Unknown"
+                    topics = processed_records[raw_id].topic_tags
+                    topic = topics[0] if topics else "None"
+                
+                if raw_id in raw_records:
+                    source = raw_records[raw_id].source or "Unknown"
+                    source_distribution[source] = source_distribution.get(source, 0) + 1
+            
+            evidence.append({
+                "id": raw_id or match.id,
+                "content": doc,
+                "segment": segment,
+                "topic": topic
+            })
+            
+        # Get broader supporting count (Pinecone returns similarity score usually between 0 and 1)
+        broader_results = index.query(
+            vector=query_embedding,
+            top_k=50,
+            include_metadata=False
+        )
+        supporting_review_count = sum(1 for match in broader_results.matches if match.score > 0.3)
+        if supporting_review_count < len(results.matches):
+            supporting_review_count = len(results.matches)
+            
+        scores = [match.score for match in results.matches]
+        avg_score = sum(scores) / len(scores) if scores else 0
+        confidence_score = max(0, min(100, int(avg_score * 100)))
+            
+    finally:
+        db.close()
         
     context_str = "\n".join(context_blocks)
     
@@ -54,8 +100,17 @@ def query_discovery_engine(question: str, top_k: int = 5):
     system_prompt = """
     You are an expert AI Product Manager for Blinkit (a quick commerce app).
     Analyze the provided user contexts to answer the PM's question.
-    Structure your answer as an actionable Product Insight Report.
-    Use clear headings, bullet points, and directly quote insights to support your conclusions.
+    
+    Structure your answer as an actionable Product Insight Report using EXACTLY the following headings (omit any that are completely irrelevant):
+    - Executive Summary
+    - Key Findings
+    - Pain Points
+    - Discovery Barriers
+    - User Motivations
+    - Product Opportunities
+    - Recommendations
+
+    Under each heading, use bullet points and directly quote insights to support your conclusions where possible.
     Focus exclusively on answering the user's prompt based on the context provided.
     
     IMPORTANT: Do NOT use asterisks (*) or markdown formatting for bold/italics anywhere in your response. 
@@ -78,18 +133,24 @@ def query_discovery_engine(question: str, top_k: int = 5):
     )
     
     raw_content = response.choices[0].message.content.strip()
-    
-    # Robust post-processing to guarantee absolutely no asterisks are returned to the UI
-    # Also removing bullet point dashes (- ) as requested, while preserving hyphenated words
     clean_content = raw_content.replace('*', '').replace('- ', '')
     
+    source_dist_str = ", ".join([f"{k}: {v}" for k, v in source_distribution.items()])
+    
+    evidence_layer_text = (
+        f"\n\n--- Evidence Layer ---\n"
+        f"Evidence Count: {len(results.matches)}\n"
+        f"Confidence Score: {confidence_score}%\n"
+        f"Source Distribution: {source_dist_str}\n"
+        f"Supporting Review Count: {supporting_review_count}\n"
+    )
+    
     return {
-        "report": clean_content,
+        "report": clean_content + evidence_layer_text,
         "evidence": evidence
     }
 
 if __name__ == "__main__":
-    # Test Question based on Blinkit case study
     test_question = "Why do users hesitate to purchase high-value items or electronics from us?"
     result = query_discovery_engine(test_question)
     print("Report:", result["report"])
