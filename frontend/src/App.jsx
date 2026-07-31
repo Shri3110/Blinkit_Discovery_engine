@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, MessageSquare, Users, BarChart2, CheckCircle2, TrendingUp, AlertTriangle, User } from 'lucide-react';
+import { Sparkles, MessageSquare, Users, BarChart2, CheckCircle2, TrendingUp, AlertTriangle, User, Download, Copy } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ReactMarkdown from 'react-markdown';
 
@@ -112,6 +112,21 @@ function App() {
 
   const parsedData = parseReport(report);
   
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(report);
+    alert('Report copied to clipboard!');
+  };
+
+  const downloadReport = () => {
+    const blob = new Blob([report], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Blinkit_AI_Report.md';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Transform Personas data (Top 5 only)
   const topPersonas = stats?.segments 
     ? [...stats.segments].sort((a, b) => b.value - a.value).slice(0, 5) 
@@ -251,22 +266,24 @@ function App() {
 
           {/* Parsed Evidence Metrics Bar */}
           {parsedData.evidenceMetrics && (
-            <div className="evidence-metrics-bar">
-              <div className="metric-badge">
-                <span className="metric-label">Confidence</span>
-                <span className="metric-value highlight">{parsedData.evidenceMetrics.confidence}</span>
+            <div className="evidence-metrics-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div className="metric-badge" title="AI confidence based on consistency of supporting reviews">
+                  <span className="metric-label">Confidence</span>
+                  <span className="metric-value highlight">{parsedData.evidenceMetrics.confidence}</span>
+                </div>
+                <div className="metric-badge">
+                  <span className="metric-label">Supporting Reviews</span>
+                  <span className="metric-value">{parsedData.evidenceMetrics.supporting}</span>
+                </div>
               </div>
-              <div className="metric-badge">
-                <span className="metric-label">Supporting Reviews</span>
-                <span className="metric-value">{parsedData.evidenceMetrics.supporting}</span>
-              </div>
-              <div className="metric-badge">
-                <span className="metric-label">Evidence Clusters</span>
-                <span className="metric-value">{parsedData.evidenceMetrics.count}</span>
-              </div>
-              <div className="metric-badge" style={{ flex: 1 }}>
-                <span className="metric-label">Source Distribution</span>
-                <span className="metric-value" style={{ fontSize: '0.9rem' }}>{parsedData.evidenceMetrics.sources}</span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={copyToClipboard} className="secondary-button" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '13px' }}>
+                  <Copy size={14} /> Copy Summary
+                </button>
+                <button onClick={downloadReport} className="primary-button" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '13px' }}>
+                  <Download size={14} /> Download Report
+                </button>
               </div>
             </div>
           )}
