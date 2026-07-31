@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Sparkles, MessageSquare, Database, Users, BarChart2, CheckCircle2, AlertTriangle, AlertCircle, TrendingUp, Download, ArrowRight, ChevronRight, FileText } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { Sparkles, MessageSquare, Users, BarChart2, CheckCircle2, TrendingUp, AlertTriangle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ReactMarkdown from 'react-markdown';
 
 const rawApiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -9,7 +9,6 @@ const API_BASE = rawApiBase.replace(/\/$/, '');
 function App() {
   const [query, setQuery] = useState('');
   const [report, setReport] = useState('');
-  const [evidence, setEvidence] = useState([]);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -48,9 +47,6 @@ function App() {
       
       const data = await res.json();
       setReport(data.report);
-      if (data.evidence) {
-        setEvidence(data.evidence);
-      }
     } catch (err) {
       console.error(err);
       setReport(`**Error**: Failed to generate insight. ${err.message}`);
@@ -59,6 +55,63 @@ function App() {
     }
   };
 
+  // Helper to parse the report into sections
+  const parseReport = (rawReport) => {
+    if (!rawReport) return { sections: {}, evidenceMetrics: null };
+
+    // 1. Separate Evidence Layer from the main report
+    const evidenceSplit = rawReport.split('--- Evidence Layer ---');
+    const mainReportText = evidenceSplit[0].trim();
+    let evidenceMetrics = null;
+
+    if (evidenceSplit.length > 1) {
+      const evidenceText = evidenceSplit[1];
+      evidenceMetrics = {
+        confidence: evidenceText.match(/Confidence Score:\s*(\d+%)/)?.[1] || 'N/A',
+        count: evidenceText.match(/Evidence Count:\s*(\d+)/)?.[1] || '0',
+        supporting: evidenceText.match(/Supporting Review Count:\s*(\d+)/)?.[1] || '0',
+        sources: evidenceText.match(/Source Distribution:\s*(.+)/)?.[1] || 'Unknown'
+      };
+    }
+
+    // 2. Parse main report by Headings
+    const sections = {};
+    const lines = mainReportText.split('\n');
+    let currentHeader = 'Intro';
+    sections[currentHeader] = [];
+
+    lines.forEach(line => {
+      // The prompt outputs headers like "- Key Findings" or "Key Findings:"
+      // We look for known headers
+      const lowerLine = line.toLowerCase().replace(/^- /g, '').trim();
+      
+      if (lowerLine.includes('key finding')) {
+        currentHeader = 'Key Findings';
+        sections[currentHeader] = [];
+      } else if (lowerLine.includes('pain point')) {
+        currentHeader = 'Pain Points';
+        sections[currentHeader] = [];
+      } else if (lowerLine.includes('product opportunit')) {
+        currentHeader = 'Product Opportunities';
+        sections[currentHeader] = [];
+      } else if (lowerLine.includes('recommend')) {
+        currentHeader = 'Recommended Actions';
+        sections[currentHeader] = [];
+      } else if (line.trim() !== '') {
+        sections[currentHeader].push(line);
+      }
+    });
+
+    // Format section text
+    Object.keys(sections).forEach(key => {
+      sections[key] = sections[key].join('\n');
+    });
+
+    return { sections, evidenceMetrics, rawMainText: mainReportText };
+  };
+
+  const parsedData = parseReport(report);
+  
   // Transform Personas data (Top 5 only)
   const topPersonas = stats?.segments 
     ? [...stats.segments].sort((a, b) => b.value - a.value).slice(0, 5) 
@@ -123,30 +176,100 @@ function App() {
         </div>
       </section>
 
-      {/* Loading & Report */}
+      {/* Loading */}
       {loading && (
         <div className="loading full-width">
-          <Sparkles className="spinner" size={18} /> Querying Vector DB & Generating Insights...
+          <Sparkles className="spinner" size={18} /> Synthesizing millions of data points into product insights...
         </div>
       )}
 
-      {report && (
-        <section className="ai-report-card full-width">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h2><Sparkles size={20} color="#F8CB46" /> Executive Insight</h2>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="secondary-button" onClick={() => alert("Simulated: Exporting to PRD...")}>
-                <FileText size={16} /> Export PRD
-              </button>
-              <button className="secondary-button" onClick={() => alert("Simulated: Creating Jira Ticket...")}>
-                <CheckCircle2 size={16} /> Create Ticket
-              </button>
+      {/* Structured AI Report */}
+      {report && !loading && (
+        <section className="ai-report-container full-width">
+          <div className="insight-cards-grid">
+            
+            {/* Key Findings */}
+            {(parsedData.sections['Key Findings'] || parsedData.sections['Intro']) && (
+              <div className="insight-card">
+                <div className="insight-card-header" style={{ color: '#10B981' }}>
+                  🟢 Key Findings
+                </div>
+                <div>
+                  <ReactMarkdown>{parsedData.sections['Key Findings'] || parsedData.sections['Intro']}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+
+            {/* Pain Points */}
+            {parsedData.sections['Pain Points'] && (
+              <div className="insight-card">
+                <div className="insight-card-header" style={{ color: '#f43f5e' }}>
+                  🔴 Top Pain Points
+                </div>
+                <div>
+                  <ReactMarkdown>{parsedData.sections['Pain Points']}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+
+            {/* Product Opportunities */}
+            {parsedData.sections['Product Opportunities'] && (
+              <div className="insight-card">
+                <div className="insight-card-header" style={{ color: '#F8CB46' }}>
+                  💡 Product Opportunities
+                </div>
+                <div>
+                  <ReactMarkdown>{parsedData.sections['Product Opportunities']}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+
+            {/* Recommended Actions */}
+            {parsedData.sections['Recommended Actions'] && (
+              <div className="insight-card">
+                <div className="insight-card-header" style={{ color: '#3b82f6' }}>
+                  ✅ Recommended Actions
+                </div>
+                <div>
+                  <ReactMarkdown>{parsedData.sections['Recommended Actions']}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback if parsing completely fails */}
+            {Object.keys(parsedData.sections).length <= 1 && !parsedData.sections['Key Findings'] && (
+              <div className="insight-card" style={{ gridColumn: '1 / -1' }}>
+                <div className="insight-card-header" style={{ color: '#F8CB46' }}>
+                  <Sparkles size={16} /> Insight Analysis
+                </div>
+                <div>
+                  <ReactMarkdown>{parsedData.rawMainText}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Parsed Evidence Metrics Bar */}
+          {parsedData.evidenceMetrics && (
+            <div className="evidence-metrics-bar">
+              <div className="metric-badge">
+                <span className="metric-label">Confidence</span>
+                <span className="metric-value highlight">{parsedData.evidenceMetrics.confidence}</span>
+              </div>
+              <div className="metric-badge">
+                <span className="metric-label">Supporting Reviews</span>
+                <span className="metric-value">{parsedData.evidenceMetrics.supporting}</span>
+              </div>
+              <div className="metric-badge">
+                <span className="metric-label">Evidence Clusters</span>
+                <span className="metric-value">{parsedData.evidenceMetrics.count}</span>
+              </div>
+              <div className="metric-badge" style={{ flex: 1 }}>
+                <span className="metric-label">Source Distribution</span>
+                <span className="metric-value" style={{ fontSize: '0.9rem' }}>{parsedData.evidenceMetrics.sources}</span>
+              </div>
             </div>
-          </div>
-          
-          <div className="markdown-body">
-            <ReactMarkdown>{report}</ReactMarkdown>
-          </div>
+          )}
         </section>
       )}
 
@@ -196,7 +319,7 @@ function App() {
 
       {/* Recent Feedback Feed */}
       <section className="glass-panel full-width">
-        <h2><MessageSquare size={20} color="#f59e0b" /> Verified Feedback Stream</h2>
+        <h2><MessageSquare size={20} color="#F8CB46" /> Verified Feedback Stream</h2>
         <div className="reviews-container">
           {reviews.map(review => {
             // Determine sentiment badge based on tags
