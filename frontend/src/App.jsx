@@ -112,13 +112,18 @@ function App() {
 
   const parsedData = parseReport(report);
   
+  const getCleanReport = () => {
+    if (!parsedData.evidenceMetrics) return report;
+    return `${parsedData.rawMainText}\n\n--- Evidence Layer ---\nConfidence Score: ${parsedData.evidenceMetrics.confidence}\nSupporting Reviews: ${parsedData.evidenceMetrics.supporting}`;
+  };
+
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(report);
+    navigator.clipboard.writeText(getCleanReport());
     alert('Report copied to clipboard!');
   };
 
   const downloadReport = () => {
-    const blob = new Blob([report], { type: 'text/markdown' });
+    const blob = new Blob([getCleanReport()], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
