@@ -118,7 +118,12 @@ def get_stats():
 def get_reviews(limit: int = 50):
     db = SessionLocal()
     try:
-        reviews = db.query(ProcessedData).join(RawData, ProcessedData.raw_data_id == RawData.id).order_by(RawData.created_at.desc()).limit(limit).all()
+        # Fetch only real feedback (Google Play & Reddit), ignore synthetic/dataset samples
+        reviews = db.query(ProcessedData)\
+            .join(RawData, ProcessedData.raw_data_id == RawData.id)\
+            .filter(RawData.source.in_(["google_play", "reddit"]))\
+            .order_by(RawData.created_at.desc(), RawData.id.desc())\
+            .limit(limit).all()
         formatted_reviews = []
         for r in reviews:
             topics = r.topic_tags
