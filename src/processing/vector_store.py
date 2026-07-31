@@ -1,13 +1,17 @@
 import os
 import time
 from pinecone import Pinecone
-from sentence_transformers import SentenceTransformer
 from src.db.database import SessionLocal
 from src.db.models import ProcessedData
 
-# Load the local embedding model (same model Chroma used natively)
-# Dimensions: 384
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Lazy load the embedding model to save RAM
+_model = None
+def get_embedding_model():
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 def run_vector_store_pipeline():
     print("Starting Vector Store Pipeline (Pinecone)...")
@@ -44,6 +48,7 @@ def run_vector_store_pipeline():
             doc_id = f"doc_{record.id}"
             
             # Generate embedding manually
+            model = get_embedding_model()
             embedding = model.encode(record.normalized_content).tolist()
             
             # Create pinecone vector object

@@ -1,14 +1,18 @@
 import os
 from pinecone import Pinecone
-from sentence_transformers import SentenceTransformer
 from groq import Groq
 from src.db.database import SessionLocal
 from src.db.models import ProcessedData, RawData
 
-# Load the local embedding model
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_ID")
+
+_model = None
+def get_embedding_model():
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 def query_discovery_engine(question: str, top_k: int = 5):
     if not GROQ_API_KEY:
@@ -17,6 +21,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
     print(f"Querying Discovery Engine: '{question}'")
     
     # Generate query embedding
+    model = get_embedding_model()
     query_embedding = model.encode(question).tolist()
     
     # Connect to Pinecone
