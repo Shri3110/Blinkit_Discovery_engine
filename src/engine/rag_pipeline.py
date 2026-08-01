@@ -42,11 +42,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
     
     matches = [m for m in results.matches if m.score > 0.3]
     
-    if not matches:
-        return {
-            "report": "Insufficient evidence found in the retrieved reviews.",
-            "evidence": []
-        }
+
         
     db = SessionLocal()
     evidence = []
@@ -153,10 +149,60 @@ def query_discovery_engine(question: str, top_k: int = 5):
     raw_content = response.choices[0].message.content.strip()
     
     if "Insufficient evidence" in raw_content:
-        return {
-            "report": "Insufficient evidence found in the retrieved reviews.",
-            "evidence": []
-        }
+        print(f"Semantic search failed for '{question}'. Falling back to SQL keyword search...")
+        try:
+            fallback_prompt = f"Extract 3-5 distinct, important keywords or root words from this question to search a database of reviews. Only output the comma-separated keywords, no other text. Question: {question}"
+            kw_response = groq_client.chat.completions.create(
+                messages=[{"role": "user", "content": fallback_prompt}],
+                model="llama-3.1-8b-instant",
+                temperature=0.0,
+                max_tokens=30,
+            )
+            keywords = [k.strip() for k in kw_response.choices[0].message.content.replace('"', '').replace('.', '').split(',')]
+            
+            db2 = SessionLocal()
+            fallback_reviews = []
+            for kw in keywords:
+                if len(kw) < 4: continue
+                matches_sql = db2.query(RawData).filter(RawData.content.ilike(f'%{kw}%')).limit(15).all()
+                for m in matches_sql:
+                    if m.content not in fallback_reviews:
+                        fallback_reviews.append(m.content)
+            db2.close()
+            
+            if fallback_reviews:
+                context_str = "\n---\n".join(fallback_reviews[:40])
+                user_prompt = f"Product Question: {question}\n\nContext:\n{context_str}"
+                response = groq_client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.0,
+                    max_tokens=1500,
+                )
+                raw_content = response.choices[0].message.content.strip()
+                if "Insufficient evidence" in raw_content:
+                    return {
+                        "report": "Insufficient evidence found in the retrieved reviews.",
+                        "evidence": []
+                    }
+                matches = [] 
+                confidence_score = 0
+                source_distribution = {"SQL_Fallback": len(fallback_reviews)}
+                supporting_review_count = len(fallback_reviews)
+            else:
+                return {
+                    "report": "Insufficient evidence found in the retrieved reviews.",
+                    "evidence": []
+                }
+        except Exception as e:
+            print(f"Fallback failed: {e}")
+            return {
+                "report": "Insufficient evidence found in the retrieved reviews.",
+                "evidence": []
+            }
         
     clean_content = raw_content.replace('*', '').replace('- ', '')
     
