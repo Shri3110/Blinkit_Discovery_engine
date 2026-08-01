@@ -150,8 +150,8 @@ function App() {
       {stats && (
         <section className="kpi-row">
           <div className="kpi-card">
-            <span className="kpi-label">AI Analyzed Reviews</span>
-            <span className="kpi-value">{stats.processed_reviews}</span>
+            <span className="kpi-label">Total Raw Reviews</span>
+            <span className="kpi-value">{stats.total_reviews}</span>
           </div>
           <div className="kpi-card">
             <span className="kpi-label">Extracted Themes</span>
