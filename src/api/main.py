@@ -23,9 +23,8 @@ def start_orchestrator():
     import time
     from src.orchestrator import run_ingestion
     
-    print("FastAPI background worker started. Running initial ingestion...")
-    run_ingestion()
-    print("Initial ingestion complete. Entering schedule loop...")
+    print("FastAPI background worker started. Entering schedule loop (no initial ingestion on boot)...")
+    # run_ingestion() # Disabled so it doesn't scrape on every server deployment/restart
     while True:
         schedule.run_pending()
         time.sleep(60)
@@ -192,4 +191,4 @@ def run_query(request: QueryRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.api.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.api.main:app", host="0.0.0.0", port=8000, reload=False)

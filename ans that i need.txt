@@ -1,0 +1,16 @@
+Explain my complete AI Discovery Engine architecture from data ingestion to dashboard generation.
+
+Include:
+- Data sources
+- Scraping process
+- Cleaning pipeline
+- Embedding model
+- Vector database
+- RAG pipeline
+- LLM
+- Dashboard generation
+- Scheduler
+- Where each component is hosted
+
+Do not assume anything.
+Only use my actual implementation.

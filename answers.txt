@@ -1,0 +1,58 @@
+Here is the complete architecture of your AI Discovery Engine, detailed exactly as implemented in your codebase:
+
+### 1. Data Sources
+- **Google Play Store:** Active.
+- **Reddit:** Active (though currently pulling 0 records).
+- **App Store:** Disabled in the orchestrator due to Apple blocking requests.
+- **Dataset Sample:** Pre-loaded test data.
+
+### 2. Scraping Process
+- Scripts are located in `src/connectors/`.
+- Uses `google-play-scraper` to pull Google Play reviews.
+- Uses `praw` to fetch Reddit posts.
+- Scraped data is saved directly into the `RawData` table in the Supabase PostgreSQL database.
+
+### 3. Cleaning & Normalization Pipeline
+- Managed by `src/processing/normalizer.py`.
+- Responsible for translating 'Hinglish' to professional English, fixing grammar, and correcting spelling.
+- Powered primarily by the **Groq API** (`llama-3.1-8b-instant`).
+- Includes a fallback to **OpenAI** (`gpt-3.5-turbo`) if Groq fails or isn't configured.
+- Cleaned text is saved to the `ProcessedData` table in Supabase.
+- *Segmentation Engine (`src/engine/segmentation_engine.py`):* Also uses Groq (`llama-3.1-8b-instant`) to infer user personas (e.g., "Convenience Seeker") and extract topics/sentiments.
+
+### 4. Embedding Model
+- Managed by `src/processing/vector_store.py`.
+- Uses the **FastEmbed** library (`sentence-transformers/all-MiniLM-L6-v2`).
+- The model is lazy-loaded locally in the backend to save RAM and converts the normalized text into 384-dimensional vector embeddings.
+
+### 5. Vector Database
+- **Pinecone** is the vector database.
+- It uses an index named `blinkit1` configured for 384 dimensions and cosine similarity.
+- It stores the embeddings along with metadata like the `raw_data_id` and the normalized text.
+
+### 6. RAG Pipeline
+- Located in `src/engine/rag_pipeline.py`.
+- Embeds the user's question using FastEmbed and performs a semantic search against Pinecone (fetching top 20 matches with a score > 0.3).
+- Joins vector results with segmentation and source metadata from Supabase to build context.
+- **Fallback Mechanism:** If the LLM determines there is "Insufficient evidence" in the semantic search, it falls back to an SQL keyword search. It uses Groq to extract 3-5 keywords from the question and queries the raw database directly using `ILIKE`.
+
+### 7. LLM (Large Language Model)
+- **Insight Synthesis:** Uses **Groq** (`llama-3.3-70b-versatile`) with a temperature of 0.0 to generate deterministic, strictly RAG-grounded Product Insight Reports.
+- **Utility Tasks:** Uses **Groq** (`llama-3.1-8b-instant`) or OpenAI for text normalization, persona segmentation, and keyword extraction.
+
+### 8. Dashboard Generation
+- A **React** frontend (located in the `frontend/` directory) displays the UI.
+- It is powered by a **FastAPI** backend (`src/api/main.py`) which provides endpoints like `/api/stats`, `/api/reviews`, `/api/trends/heatmap`, and `/api/query` to populate the dashboard charts and reports.
+
+### 9. Scheduler
+- Managed by `src/orchestrator.py` and run via a background thread in the FastAPI app.
+- Uses the Python `schedule` library.
+- Runs an initial ingestion as soon as the backend server boots up.
+- Afterwards, it runs a daily job automatically every day at **02:00 AM**.
+
+### 10. Where Each Component is Hosted
+- **Backend API & Scheduler:** Hosted on **Render** (as defined by `render.yaml`).
+- **Relational Database:** Hosted on **Supabase** (PostgreSQL).
+- **Vector Database:** Hosted on **Pinecone**.
+- **Frontend:** Typically deployed on Vercel or Netlify (separate from the Render backend configuration).
+- **LLM / Inference:** Handled via external APIs (**Groq** and **OpenAI**).
