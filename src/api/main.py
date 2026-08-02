@@ -1,3 +1,4 @@
+import time
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -7,7 +8,13 @@ from src.db.database import SessionLocal
 from src.db.models import ProcessedData, RawData
 from src.engine.rag_pipeline import query_discovery_engine
 
+START_TIME = time.time()
+
 app = FastAPI(title="Blinkit AI Discovery Engine API")
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "uptime": time.time() - START_TIME}
 
 # Allow CORS for the React frontend
 app.add_middleware(
