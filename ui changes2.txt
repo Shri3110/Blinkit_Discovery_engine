@@ -1,0 +1,195 @@
+Absolutely. Here's the updated prompt with the **"General" persona refinement** included.
+
+---
+
+## Prompt
+
+I want to refine the dashboard visualizations so they resemble an executive Product Analytics dashboard used internally at companies like Blinkit, Uber, or Spotify.
+
+Do **not** change the backend, APIs, data processing, or architecture. These are **UI and presentation improvements only.**
+
+---
+
+# 1. Top 5 User Personas
+
+Refine the **Top 5 User Personas** chart.
+
+### Display
+
+Instead of showing only persona names, display:
+
+```
+Persona Name (Review Count | Percentage)
+```
+
+Example:
+
+```
+Convenience Seeker (612 | 38.6%)
+Quality-Driven Buyer (328 | 20.7%)
+```
+
+Where:
+
+* Review Count = number of processed reviews
+* Percentage = percentage of total processed reviews
+
+### Tooltip
+
+On hover, display:
+
+* Persona Name
+* Review Count
+* Percentage of processed reviews
+
+Example:
+
+```
+Convenience Seeker
+
+Reviews: 612
+Share: 38.6%
+```
+
+### Empty State
+
+If there are no processed reviews, display:
+
+> **Insufficient processed reviews to generate meaningful visualization.**
+
+instead of rendering an empty chart.
+
+---
+
+# 2. Topic Distribution by Persona
+
+Rename the chart:
+
+**Feedback by Topic**
+
+↓
+
+**Topic Distribution by Persona**
+
+### Axis Labels
+
+X-axis:
+
+```
+Persona
+```
+
+Y-axis:
+
+```
+Review Count
+```
+
+### Tooltip
+
+Display:
+
+* Persona Name
+* Every topic
+* Review Count
+* Percentage **within that persona**
+
+Example:
+
+```
+Convenience Seeker
+
+Delivery
+142 Reviews
+35%
+
+Pricing
+97 Reviews
+24%
+
+Search
+65 Reviews
+16%
+
+Product Quality
+48 Reviews
+12%
+```
+
+The percentages must be calculated relative to that persona's total reviews.
+
+---
+
+# 3. Persona Naming Improvement
+
+The current persona label **"General"** feels unfinished and weak compared to the other personas.
+
+Current personas:
+
+* Convenience Seeker
+* Quality-Driven Buyer
+* Brand Loyalist
+* Frustrated Power User
+* **General**
+
+If the clustering genuinely cannot infer a stronger behavioural pattern, keeping a fallback persona is acceptable.
+
+However, before assigning **"General"**, attempt to derive a more descriptive behavioural label from the underlying review cluster.
+
+Examples (only if supported by the data):
+
+* Value-Conscious Shopper
+* Routine Shopper
+* Casual Buyer
+* Occasional Shopper
+* Everyday Shopper
+* Price-Conscious Shopper
+
+Do **not** invent behavioural labels.
+
+If the evidence is insufficient, use **General** as the fallback.
+
+---
+
+# 4. Visual Polish
+
+Improve chart readability:
+
+* Consistent spacing
+* Better legend placement
+* Professional typography
+* Proper axis padding
+* Rounded tooltips
+* Executive dashboard styling
+
+Do not change colours unless necessary.
+
+---
+
+# 5. AI Summary
+
+Place an **AI Summary** directly below the charts.
+
+Generate this **deterministically** from the dashboard statistics.
+
+Do **not** use the LLM.
+
+Example:
+
+> Convenience Seekers represent the largest user segment (38.6%). Delivery-related feedback dominates this persona, indicating a high-impact opportunity for product improvements.
+
+If processed review data is unavailable, display:
+
+> **Insufficient processed reviews to generate an executive summary.**
+
+---
+
+## Constraints
+
+* Do not modify backend architecture.
+* Do not modify APIs.
+* Do not modify Pinecone, Groq, embeddings, or the RAG pipeline.
+* Do not modify persona generation logic unless it is only to improve the final display label.
+* Preserve all existing functionality.
+
+The objective is to make the dashboard feel like a polished, executive-ready Product Intelligence dashboard while remaining fully grounded in the existing data and architecture.

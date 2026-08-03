@@ -1,0 +1,14 @@
+
+
+> Generate additional realistic Blinkit user reviews that provide stronger evidence for answering these product research questions:
+>
+> * Why do users repeatedly buy from the same categories?
+> * What prevents users from exploring new categories?
+> * How do users discover products today?
+> * What role do habits play in shopping behavior?
+> * What information do users need before trying a new category?
+> * What frustrations emerge repeatedly?
+> * Which user segments are more likely to experiment?
+> * What unmet needs emerge consistently across discussions?
+>
+> The reviews should sound like genuine Google Play/App Store reviews, naturally mentioning shopping habits, search behaviour, product discovery, category exploration, trust, pricing, quality, recommendations, and repeat purchases. Do not make the reviews explicitly answer the questions. Instead, embed the evidence naturally so the RAG pipeline can retrieve and synthesize meaningful insights. Avoid repetitive wording and ensure a mix of positive, negative, and neutral experiences.

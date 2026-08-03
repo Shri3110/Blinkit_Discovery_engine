@@ -1,0 +1,101 @@
+Here's a prompt that is specific enough for Antigravity to implement without changing your backend logic.
+
+---
+
+## Prompt
+
+The current insight sections are informative, but they read like an AI-generated report with long sentences. I want the dashboard to resemble an executive Product Intelligence dashboard used internally at companies like Blinkit, Uber, or Spotify.
+
+Please **change only the presentation format**, not the retrieval pipeline, synthesis logic, or RAG architecture.
+
+### Required Changes
+
+Convert every insight section into concise bullet points.
+
+Use the following format:
+
+### Key Findings
+
+* Maximum **3 bullet points**
+* Each bullet should be **one short sentence (10–18 words)**
+* Highlight only the strongest evidence-backed findings.
+* Avoid repeating the same idea.
+
+### Pain Points
+
+* Maximum **3 bullet points**
+* One pain point per bullet.
+* Be specific and evidence-driven.
+* Avoid generic statements like "Poor service."
+
+### Product Opportunities
+
+* Maximum **3 bullet points**
+* Phrase each as a product opportunity rather than a solution.
+* Prefer statements such as:
+
+  * Opportunity to improve product discovery.
+  * Opportunity to reduce search dependency.
+  * Opportunity to strengthen trust before category exploration.
+
+Avoid immediately proposing features unless the evidence clearly supports them.
+
+### Recommended Actions
+
+* Maximum **3 bullet points**
+* Each bullet should begin with an action verb:
+
+  * Validate
+  * Prioritize
+  * Measure
+  * Investigate
+  * Prototype
+  * Experiment
+  * Monitor
+
+Keep every recommendation concise and actionable.
+
+### Writing Style
+
+* One idea per bullet.
+* Maximum **one line per bullet**.
+* Use proper punctuation.
+* No paragraphs.
+* No repeated wording across sections.
+* No consultant buzzwords.
+* Sound like a Senior Product Manager preparing a weekly executive insights report.
+
+### Example
+
+**Key Findings**
+
+* Users primarily rely on exact keyword search.
+* Shopping behaviour is highly routine-driven.
+* Product discovery beyond regular purchases is limited.
+
+**Pain Points**
+
+* No dedicated pathway for discovering new products.
+* Search performs poorly for exploratory shopping.
+* Homepage content receives limited engagement.
+
+**Product Opportunities**
+
+* Opportunity to improve product discovery.
+* Opportunity to reduce dependence on keyword search.
+* Opportunity to increase category exploration.
+
+**Recommended Actions**
+
+* Validate a dedicated Discover section through an A/B test.
+* Measure changes in category exploration rate.
+* Prioritize search improvements for exploratory queries.
+
+### Constraints
+
+* Do **not** modify the backend architecture.
+* Do **not** change the retrieval pipeline.
+* Do **not** alter the RAG logic.
+* Only improve how the generated insights are presented to the user.
+
+The goal is to make the dashboard significantly easier to scan while preserving all evidence-backed insights.

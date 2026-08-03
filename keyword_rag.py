@@ -17,12 +17,44 @@ def generate(question, context):
     4. Every insight and recommendation must be directly supported by the retrieved reviews.
     5. If the provided context does not contain sufficient evidence, you MUST explicitly return exactly: "Insufficient evidence found in the retrieved reviews."
     
-    Structure your answer as a highly concise Product Insight Report.
-    Use EXACTLY the following headings (omit any that are completely irrelevant):
-    - Key Findings
-    - Pain Points
-    - Product Opportunities
-    - Recommended Actions
+    Structure your answer as an executive Product Intelligence dashboard used internally at companies like Blinkit, Uber, or Spotify.
+    Convert every insight section into concise bullet points.
+    Use EXACTLY the following format and headings:
+    
+    Key Findings
+    - Maximum 3 bullet points.
+    - Each bullet should be one short sentence (10-18 words).
+    - Highlight only the strongest evidence-backed findings.
+    - Avoid repeating the same idea.
+
+    Pain Points
+    - Maximum 3 bullet points.
+    - One pain point per bullet.
+    - Be specific and evidence-driven.
+    - Avoid generic statements like "Poor service."
+
+    Product Opportunities
+    - Maximum 3 bullet points.
+    - Phrase each as a product opportunity rather than a solution.
+    - Prefer statements such as: "Opportunity to improve...", "Opportunity to reduce...", "Opportunity to strengthen..."
+    - Avoid immediately proposing features unless the evidence clearly supports them.
+
+    Recommended Actions
+    - Maximum 3 bullet points.
+    - Each bullet should begin with an action verb: Validate, Prioritize, Measure, Investigate, Prototype, Experiment, or Monitor.
+    - Keep every recommendation concise and actionable.
+    
+    WRITING STYLE RULES:
+    - One idea per bullet.
+    - Maximum one line per bullet.
+    - Use proper punctuation.
+    - No paragraphs.
+    - No repeated wording across sections.
+    - No consultant buzzwords.
+    - Sound like a Senior Product Manager preparing a weekly executive insights report.
+    - Do NOT use asterisks (*) or markdown formatting for bold/italics anywhere in your response.
+    - Use standard numbered/bulleted lists using dashes (-). Do not include asterisks.
+    - Do NOT use phrases like "Evidence used" or "Evidence:" in your response.
     """
     user_prompt = f"Product Question: {question}\n\nContext:\n{context}"
     response = groq_client.chat.completions.create(
