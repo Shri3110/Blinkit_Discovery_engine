@@ -94,8 +94,14 @@ def query_discovery_engine(question: str, top_k: int = 5):
             supporting_review_count = len(matches)
             
         scores = [match.score for match in matches]
-        avg_score = sum(scores) / len(scores) if scores else 0
-        confidence_score = max(0, min(100, int(avg_score * 100)))
+        if scores:
+            top_score = max(scores)
+            high_relevance_count = sum(1 for s in scores if s > 0.5)
+            density_ratio = high_relevance_count / len(scores)
+            raw_confidence = (0.75 * top_score) + (0.25 * density_ratio)
+            confidence_score = max(0, min(100, int(raw_confidence * 100)))
+        else:
+            confidence_score = 0
             
     finally:
         db.close()
