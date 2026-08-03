@@ -120,20 +120,41 @@ def query_discovery_engine(question: str, top_k: int = 5):
     4. Every insight and recommendation must be directly supported by the retrieved reviews. Do not make assumptions or speculative conclusions.
     5. If the provided context does not contain sufficient evidence to answer the query, you MUST explicitly return exactly: "Insufficient evidence found in the retrieved reviews."
     
-    Structure your answer as a highly concise Product Insight Report.
-    Use EXACTLY the following headings (omit any that are completely irrelevant):
-    - Key Findings
-    - Pain Points
-    - Product Opportunities
-    - Recommended Actions
-
-    IMPORTANT GUIDELINES:
-    - Avoid vague generalizations. Be extremely specific.
-    - Directly reference exact scenarios, item types, or issues mentioned in the context.
-    - Provide highly actionable Product Opportunities and Recommended Actions that an engineering/design team could actually build.
-    - Keep explanations punchy and data-driven. Use max 2 bullet points per section.
+    Structure your answer as an executive Product Intelligence dashboard used internally at companies like Blinkit, Uber, or Spotify.
+    Convert every insight section into concise bullet points.
+    Use EXACTLY the following format and headings:
     
-    FORMATTING RULES:
+    Key Findings
+    - Maximum 3 bullet points.
+    - Each bullet should be one short sentence (10-18 words).
+    - Highlight only the strongest evidence-backed findings.
+    - Avoid repeating the same idea.
+
+    Pain Points
+    - Maximum 3 bullet points.
+    - One pain point per bullet.
+    - Be specific and evidence-driven.
+    - Avoid generic statements like "Poor service."
+
+    Product Opportunities
+    - Maximum 3 bullet points.
+    - Phrase each as a product opportunity rather than a solution.
+    - Prefer statements such as: "Opportunity to improve...", "Opportunity to reduce...", "Opportunity to strengthen..."
+    - Avoid immediately proposing features unless the evidence clearly supports them.
+
+    Recommended Actions
+    - Maximum 3 bullet points.
+    - Each bullet should begin with an action verb: Validate, Prioritize, Measure, Investigate, Prototype, Experiment, or Monitor.
+    - Keep every recommendation concise and actionable.
+    
+    WRITING STYLE RULES:
+    - One idea per bullet.
+    - Maximum one line per bullet.
+    - Use proper punctuation.
+    - No paragraphs.
+    - No repeated wording across sections.
+    - No consultant buzzwords.
+    - Sound like a Senior Product Manager preparing a weekly executive insights report.
     - Do NOT use asterisks (*) or markdown formatting for bold/italics anywhere in your response.
     - Use standard numbered/bulleted lists using dashes (-). Do not include asterisks.
     - Do NOT use phrases like "Evidence used" or "Evidence:" in your response.
@@ -209,8 +230,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
                 "report": "Insufficient evidence found in the retrieved reviews.",
                 "evidence": []
             }
-        
-    clean_content = raw_content.replace('*', '').replace('- ', '')
+    clean_content = raw_content.replace('*', '')
     
     source_dist_str = ", ".join([f"{k}: {v}" for k, v in source_distribution.items()])
     
