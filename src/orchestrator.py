@@ -10,9 +10,9 @@ from src.engine.segmentation_engine import run_segmentation_pipeline
 
 def run_ingestion():
     print("Starting data ingestion...")
-    fetch_google_play_reviews()
-    # fetch_app_store_reviews() # Disabled due to Apple blocks
-    fetch_reddit_posts()
+    fetch_google_play_reviews(count=100)
+    # fetch_app_store_reviews(count=100) # Disabled due to Apple blocks
+    fetch_reddit_posts(limit=100)
     print("Data ingestion completed.")
     
     print("Starting Phase 2 processing...")

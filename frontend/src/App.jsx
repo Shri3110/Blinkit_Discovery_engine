@@ -149,9 +149,18 @@ function App() {
       {/* High Level KPI Cards */}
       {stats && (
         <section className="kpi-row">
-          <div className="kpi-card">
+          <div className="kpi-card" title={stats.last_updated ? `Last Updated: ${new Date(stats.last_updated).toLocaleString()}` : ''}>
             <span className="kpi-label">Total Raw Reviews</span>
             <span className="kpi-value">{stats.total_reviews}</span>
+            {stats.last_updated && (
+              <span style={{ fontSize: '0.75rem', color: '#a1a1aa', marginTop: '4px', display: 'block' }}>
+                Updated: {new Date(stats.last_updated).toLocaleString()}
+              </span>
+            )}
+          </div>
+          <div className="kpi-card">
+            <span className="kpi-label">Reviews Processed</span>
+            <span className="kpi-value">{stats.processed_reviews}</span>
           </div>
           <div className="kpi-card">
             <span className="kpi-label">Extracted Themes</span>
@@ -160,10 +169,6 @@ function App() {
           <div className="kpi-card">
             <span className="kpi-label">Identified Personas</span>
             <span className="kpi-value">{stats.user_segments}</span>
-          </div>
-          <div className="kpi-card">
-            <span className="kpi-label">Top Pain Point</span>
-            <span className="kpi-value" style={{color: '#f43f5e', fontSize: '1.25rem'}}>Delivery Times</span>
           </div>
         </section>
       )}

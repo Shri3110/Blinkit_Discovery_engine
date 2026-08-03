@@ -1,0 +1,7 @@
+Does the LLM generate insights from all raw reviews, all processed reviews, or only a retrieved subset of processed reviews?
+Please explain the complete flow starting from review ingestion until insight generation.
+At which exact stage are raw reviews converted into processed reviews?
+How does the RAG pipeline retrieve reviews before calling the LLM?
+Does the LLM ever receive all processed reviews at once? If not, how many reviews are typically passed as context?
+Which files in my code implement each of these stages?
+If an interviewer asks, "Your system ingested 4,650 reviews but processed only 1,584. How can the generated insights still be reliable?", what would be the technically correct answer based on my implementation?

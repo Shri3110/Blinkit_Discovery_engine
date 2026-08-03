@@ -54,6 +54,9 @@ def get_stats():
         total_raw = db.query(RawData).count()
         total_processed = db.query(ProcessedData).count()
         
+        last_updated_record = db.query(func.max(RawData.created_at)).scalar()
+        last_updated = last_updated_record.isoformat() if last_updated_record else None
+        
         sources_count = db.query(RawData.source).distinct().count()
         
         raw_data = db.query(RawData.metadata_json).all()
@@ -109,6 +112,7 @@ def get_stats():
         return {
             "total_reviews": total_raw,
             "processed_reviews": total_processed,
+            "last_updated": last_updated,
             "positive": positive,
             "negative": negative,
             "neutral": neutral,
