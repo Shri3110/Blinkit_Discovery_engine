@@ -13,7 +13,12 @@ def infer_segmentation(content):
         
     system_prompt = """
     Analyze the user review/feedback.
-    Infer the behavioral user persona based on their pain points or needs (e.g., 'Price-Conscious Shopper', 'Convenience Seeker', 'Quality-Driven Buyer', 'Frustrated Power User', 'Brand Loyalist'). Avoid generic demographic guesses unless explicitly stated.
+    Infer the behavioral user persona based on their pain points or needs. 
+    Examples: 'Convenience Seeker', 'Quality-Driven Buyer', 'Brand Loyalist', 'Frustrated Power User'. 
+    If you cannot infer a strong behavioural pattern from these, attempt to derive a descriptive behavioural label (e.g., 'Value-Conscious Shopper', 'Routine Shopper', 'Casual Buyer', 'Occasional Shopper', 'Everyday Shopper', 'Price-Conscious Shopper').
+    Do not invent non-behavioural labels. If the evidence is truly insufficient to infer any behavioural persona, use 'General' as the absolute fallback.
+    Avoid generic demographic guesses unless explicitly stated.
+    
     Infer 1-3 primary product/service topics, and attach an implicit sentiment if applicable (e.g., '[Sentiment: Positive] Quick Delivery', '[Sentiment: Negative] Spoiled Produce', 'App Navigation').
     
     You MUST output valid JSON only in this exact format:

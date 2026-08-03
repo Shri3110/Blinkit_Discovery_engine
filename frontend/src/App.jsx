@@ -133,9 +133,76 @@ function App() {
   };
 
   // Transform Personas data (Top 5 only)
+  const processedCount = stats?.processed_reviews || 1;
   const topPersonas = stats?.segments 
-    ? [...stats.segments].sort((a, b) => b.value - a.value).slice(0, 5) 
+    ? [...stats.segments].sort((a, b) => b.value - a.value).slice(0, 5).map(p => ({
+        ...p,
+        label: `${p.name} (${p.value} | ${((p.value / processedCount) * 100).toFixed(1)}%)`,
+        percentage: ((p.value / processedCount) * 100).toFixed(1)
+      }))
     : [];
+
+  const PersonaTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', padding: '12px', color: '#f8fafc', fontSize: '13px' }}>
+          <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>{data.name}</p>
+          <p style={{ margin: '4px 0', color: '#a1a1aa' }}>Reviews: <span style={{ color: '#f8fafc' }}>{data.value}</span></p>
+          <p style={{ margin: '0', color: '#a1a1aa' }}>Share: <span style={{ color: '#f8fafc' }}>{data.percentage}%</span></p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const TopicTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const totalReviews = payload.reduce((sum, entry) => sum + (entry.value || 0), 0);
+      return (
+        <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', padding: '12px', color: '#f8fafc', fontSize: '13px', minWidth: '160px' }}>
+          <p style={{ margin: '0 0 12px 0', fontWeight: 'bold', borderBottom: '1px solid #27272a', paddingBottom: '8px' }}>{label}</p>
+          {payload.map((entry, index) => {
+            const val = entry.value || 0;
+            const percentage = totalReviews > 0 ? ((val / totalReviews) * 100).toFixed(0) : 0;
+            if (val === 0) return null;
+            return (
+              <div key={index} style={{ marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <div style={{ width: '8px', height: '8px', backgroundColor: entry.color, borderRadius: '50%' }}></div>
+                  <span style={{ color: '#a1a1aa' }}>{entry.name}</span>
+                </div>
+                <div style={{ paddingLeft: '14px' }}>
+                  <span style={{ color: '#f8fafc', marginRight: '8px' }}>{val} Reviews</span>
+                  <span style={{ color: '#f8fafc', fontWeight: 'bold' }}>{percentage}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  let aiSummary = "";
+  if (topPersonas.length > 0 && heatmapData.length > 0) {
+    const largestPersona = topPersonas[0];
+    const personaTopics = heatmapData.find(h => h.segment === largestPersona.name);
+    if (personaTopics) {
+      let maxCount = 0;
+      let topTopic = "";
+      Object.entries(personaTopics).forEach(([key, val]) => {
+        if (key !== 'segment' && typeof val === 'number' && val > maxCount) {
+          maxCount = val;
+          topTopic = key;
+        }
+      });
+      if (topTopic) {
+        aiSummary = `${largestPersona.name}s represent the largest user segment (${largestPersona.percentage}%). ${topTopic}-related feedback dominates this persona, indicating a high-impact opportunity for product improvements.`;
+      }
+    }
+  }
 
   return (
     <div className="app-container">
@@ -307,42 +374,60 @@ function App() {
         <section className="glass-panel">
           <h2><Users size={20} color="#3b82f6" /> Top 5 User Personas</h2>
           <div style={{ width: '100%', height: 280, marginTop: '20px' }}>
-            <ResponsiveContainer>
-              <BarChart data={topPersonas} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
-                <XAxis type="number" stroke="#a1a1aa" hide />
-                <YAxis dataKey="name" type="category" stroke="#f8fafc" width={140} tick={{ fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#f8fafc' }} cursor={{fill: 'rgba(255,255,255,0.05)'}}/>
-                <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
+            {topPersonas.length > 0 ? (
+              <ResponsiveContainer>
+                <BarChart data={topPersonas} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
+                  <XAxis type="number" stroke="#a1a1aa" hide />
+                  <YAxis dataKey="label" type="category" stroke="#f8fafc" width={220} tick={{ fontSize: 12 }} />
+                  <Tooltip content={<PersonaTooltip />} cursor={{fill: 'rgba(255,255,255,0.05)'}}/>
+                  <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                <strong style={{ color: '#a1a1aa' }}>Insufficient processed reviews to generate meaningful visualization.</strong>
+              </div>
+            )}
           </div>
         </section>
 
         {/* Top Topics by Volume (Replacing Heatmap) */}
         <section className="glass-panel">
-          <h2><BarChart2 size={20} color="#10b981" /> Feedback by Topic</h2>
+          <h2><BarChart2 size={20} color="#10b981" /> Topic Distribution by Persona</h2>
           <div style={{ width: '100%', height: 280, marginTop: '20px' }}>
             {heatmapData.length > 0 ? (
               <ResponsiveContainer>
-                <BarChart data={heatmapData} margin={{ top: 20, right: 0, left: -20, bottom: 5 }}>
+                <BarChart data={heatmapData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="segment" stroke="#a1a1aa" tick={{ fontSize: 11 }} />
-                  <YAxis stroke="#a1a1aa" tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#f8fafc' }} />
-                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}/>
+                  <XAxis dataKey="segment" stroke="#a1a1aa" tick={{ fontSize: 11 }} label={{ value: 'Persona', position: 'insideBottom', offset: -10, fill: '#a1a1aa' }} />
+                  <YAxis stroke="#a1a1aa" tick={{ fontSize: 11 }} label={{ value: 'Review Count', angle: -90, position: 'insideLeft', fill: '#a1a1aa', offset: 15 }} />
+                  <Tooltip content={<TopicTooltip />} cursor={{fill: 'rgba(255,255,255,0.05)'}} />
+                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px' }}/>
                   <Bar dataKey="Pricing" stackId="a" fill="#3b82f6" />
                   <Bar dataKey="Delivery" stackId="a" fill="#10b981" />
                   <Bar dataKey="Customer Service" stackId="a" fill="#f43f5e" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p style={{ color: '#a1a1aa' }}>Loading analytics...</p>
+              <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                <strong style={{ color: '#a1a1aa' }}>Insufficient processed reviews to generate meaningful visualization.</strong>
+              </div>
             )}
           </div>
         </section>
 
       </div>
+
+      {/* AI Summary */}
+      <section className="glass-panel full-width" style={{ marginTop: '24px', marginBottom: '24px' }}>
+        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '1.1rem', color: '#f8fafc' }}>
+          <Sparkles size={18} color="#F8CB46" /> Executive AI Summary
+        </h3>
+        <p style={{ color: '#e4e4e7', lineHeight: '1.6', margin: 0 }}>
+          {stats?.processed_reviews > 0 && aiSummary ? aiSummary : <strong style={{ color: '#a1a1aa' }}>Insufficient processed reviews to generate an executive summary.</strong>}
+        </p>
+      </section>
 
       {/* Recent Feedback Feed */}
       <section className="glass-panel full-width">
