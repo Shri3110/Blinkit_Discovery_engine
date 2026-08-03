@@ -18,18 +18,21 @@ def generate_and_ingest():
         
     print("Generating mock reviews via Groq...")
     prompt = """
-Generate 30 realistic Blinkit user reviews that provide stronger evidence for answering these product research questions:
+Generate 30 highly detailed, in-depth Blinkit user reviews or user interview transcripts. 
 
-* Why do users repeatedly buy from the same categories?
-* What prevents users from exploring new categories?
-* How do users discover products today?
-* What role do habits play in shopping behavior?
-* What information do users need before trying a new category?
-* What frustrations emerge repeatedly?
-* Which user segments are more likely to experiment?
-* What unmet needs emerge consistently across discussions?
+Your goal is to explicitly provide detailed answers to the following product research questions through the voice of the users:
+1. Why do users repeatedly buy from the same categories? (e.g. Convenience, trust in freshness, zero cognitive load, reorder button)
+2. What prevents users from exploring new categories? (e.g. Fear of poor quality in electronics/clothes, lack of rich product details, prices)
+3. How do users discover products today? (e.g. Only searching explicitly for what they need, ignoring banners, relying on push notifications)
+4. What role do habits play in shopping behavior? (e.g. Buying milk and bread every morning without looking at the app homepage)
+5. What information do users need before trying a new category? (e.g. Reviews, return policies, better imagery, trusted brands)
+6. What frustrations emerge repeatedly? (e.g. Out of stock on regular items, bad produce quality, high surge pricing)
+7. Which user segments are more likely to experiment? (e.g. Gen Z users buying impulse snacks vs parents buying staples)
+8. What unmet needs emerge consistently across discussions? (e.g. Weekly meal planning, subscribing to daily items, better filtering)
 
-The reviews should sound like genuine Google Play/App Store reviews, naturally mentioning shopping habits, search behaviour, product discovery, category exploration, trust, pricing, quality, recommendations, and repeat purchases. Do not make the reviews explicitly answer the questions. Instead, embed the evidence naturally so the RAG pipeline can retrieve and synthesize meaningful insights. Avoid repetitive wording and ensure a mix of positive, negative, and neutral experiences.
+Each review MUST focus heavily on explicitly addressing 2 or 3 of these questions directly and clearly. Do not be subtle. The AI system relying on these reviews needs strong, blatant evidence for these points.
+
+Make them sound like real users talking about their experiences, habits, and frustrations. Write lengthy paragraphs (3-4 sentences per review) packed with rich context.
 
 You MUST output ONLY a valid JSON object with a single key "reviews" mapping to a list of strings.
 Example: {"reviews": ["Review 1", "Review 2"]}
@@ -40,7 +43,7 @@ Example: {"reviews": ["Review 1", "Review 2"]}
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.3-70b-versatile",
         temperature=0.7,
-        max_tokens=3000,
+        max_tokens=4000,
         response_format={"type": "json_object"}
     )
     
@@ -56,6 +59,12 @@ Example: {"reviews": ["Review 1", "Review 2"]}
     
     db = SessionLocal()
     try:
+        # First, delete old mock data to avoid duplication
+        print("Clearing old mock_data from RawData...")
+        deleted = db.query(RawData).filter(RawData.source == "mock_data").delete()
+        print(f"Deleted {deleted} old mock records.")
+        # Note: ProcessedData might need to be cleaned too if needed, but we'll focus on RawData
+        
         inserted = 0
         for rev in reviews:
             # Create a mock source_id
