@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from pinecone import Pinecone
 from groq import Groq
 from src.db.database import SessionLocal
@@ -168,7 +170,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         temperature=0.0,
         max_tokens=1500,
     )
@@ -205,7 +207,7 @@ def query_discovery_engine(question: str, top_k: int = 5):
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
                     ],
-                    model="llama-3.3-70b-versatile",
+                    model="llama-3.1-8b-instant",
                     temperature=0.0,
                     max_tokens=1500,
                 )
