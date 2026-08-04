@@ -429,42 +429,6 @@ function App() {
         </p>
       </section>
 
-      {/* Recent Feedback Feed */}
-      <section className="glass-panel full-width">
-        <h2><MessageSquare size={20} color="#F8CB46" /> Verified Feedback Stream</h2>
-        <div className="reviews-container">
-          {reviews.map(review => {
-            // Refined sentiment badge logic
-            let sentiment = 'neutral';
-            const topicsStr = (review.topics || []).join(' ').toLowerCase();
-            if (topicsStr.includes('positive') || topicsStr.includes('great') || topicsStr.includes('fast')) sentiment = 'positive';
-            if (topicsStr.includes('issue') || topicsStr.includes('delivery') || topicsStr.includes('support') || topicsStr.includes('bad') || topicsStr.includes('missing')) sentiment = 'negative';
-
-            return (
-              <div key={review.id} className="review-card" style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', padding: '20px 0' }}>
-                <div style={{ padding: '10px', background: 'var(--bg-dark)', borderRadius: '50%', border: '1px solid var(--border-color)', flexShrink: 0 }}>
-                  <User size={18} color="var(--text-secondary)" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="review-tags" style={{ marginBottom: '10px' }}>
-                    {sentiment !== 'neutral' && <span className={`badge ${sentiment}`}>{sentiment}</span>}
-                    {review.segment && <span className="badge segment">{review.segment}</span>}
-                    {review.topics && review.topics.slice(0,2).map(t => (
-                      <span key={t} className="badge" style={{ background: 'var(--bg-dark)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="review-text" style={{ fontStyle: 'italic', lineHeight: '1.6', color: '#f8fafc', fontSize: '0.95rem' }}>
-                    "{review.content}"
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-          {reviews.length === 0 && <p>No feedback available. You may need to refresh.</p>}
-        </div>
-      </section>
 
     </div>
   );

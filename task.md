@@ -14,11 +14,11 @@
 - `[x]` 3.3 RAG & Insight Generation (Querying ChromaDB and Synthesizing)
 
 # Phase 4: Presentation & Dashboard UI
-- `[ ]` 4.1 Dashboard Frontend (Streamlit implementation)
-- `[ ]` 4.2 Trend & Heatmap Visualizations (Streamlit charting)
-- `[ ]` 4.3 Evidence Viewer (Drill-down UI integration)
+- `[x]` 4.1 Dashboard Frontend (Streamlit implementation)
+- `[x]` 4.2 Trend & Heatmap Visualizations (Streamlit charting)
+- `[x]` 4.3 Evidence Viewer (Drill-down UI integration)
 
 # Phase 5: Verification, Refinement & Deployment
-- `[ ]` 5.1 Deployment Configuration (Streamlit Cloud / Render / Railway)
-- `[ ]` 5.2 Performance & Cost Optimization (Toggling OpenAI/Groq)
-- `[ ]` 5.3 UAT & Handoff (Beta testing & documentation)
+- `[x]` 5.1 Deployment Configuration (Streamlit Cloud / Render / Railway)
+- `[x]` 5.2 Performance & Cost Optimization (Toggling OpenAI/Groq)
+- `[x]` 5.3 UAT & Handoff (Beta testing & documentation)
